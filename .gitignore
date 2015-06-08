@@ -1,0 +1,7 @@
+*.jsdtscope
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.wst.common.component
+target/
+bin/
+build/
+.settings/
