@@ -13,6 +13,7 @@ import edu.neu.ccis.sms.dao.categories.UserToMemberMappingDao;
 import edu.neu.ccis.sms.dao.categories.UserToMemberMappingDaoImpl;
 import edu.neu.ccis.sms.entity.categories.Member;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
+import edu.neu.ccis.sms.entity.submissions.Document;
 import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.entity.users.User;
 import edu.neu.ccis.sms.util.HibernateUtil;
@@ -88,8 +89,7 @@ public class UserDaoImpl implements UserDao {
     @SuppressWarnings("unchecked")
     public List<User> getAllUser() {
         openCurrentSessionwithTransaction();
-        List<User> users = (List<User>) getCurrentSession().createQuery(
-                "from User").list();
+        List<User> users = (List<User>) getCurrentSession().createQuery("from User").list();
         closeCurrentSessionwithTransaction();
         return users;
     }
@@ -109,8 +109,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User findUserByUsername(String username) {
         openCurrentSessionwithTransaction();
-        Query query = getCurrentSession().createQuery(
-                "from User WHERE username = :username");
+        Query query = getCurrentSession().createQuery("from User WHERE username = :username");
         query.setParameter("username", username);
         List<User> users = (List<User>) query.list();
         closeCurrentSessionwithTransaction();
@@ -124,9 +123,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User findUserByUsernameAndPassword(String username, String password) {
         openCurrentSessionwithTransaction();
-        Query query = getCurrentSession()
-                .createQuery(
-                        "from User WHERE username = :username AND password = :password");
+        Query query = getCurrentSession().createQuery("from User WHERE username = :username AND password = :password");
         query.setParameter("username", username);
         query.setParameter("password", password);
 
@@ -140,8 +137,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public UserToMemberMapping registerUserForMember(User user, Member member,
-            RoleType role) {
+    public UserToMemberMapping registerUserForMember(User user, Member member, RoleType role) {
         UserToMemberMapping mapping = new UserToMemberMapping();
         mapping.setMember(member);
         mapping.setUser(user);
@@ -154,8 +150,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public UserToMemberMapping registerUserForMember(Long userId,
-            Long memeberId, RoleType role) {
+    public UserToMemberMapping registerUserForMember(Long userId, Long memeberId, RoleType role) {
         User u1 = getUser(userId);
 
         MemberDao memDao = new MemberDaoImpl();

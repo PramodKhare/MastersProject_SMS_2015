@@ -23,10 +23,8 @@ import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
 import edu.neu.ccis.sms.entity.submissions.Document;
 
 @Entity
-@Table(name = "User", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "USER_ID"),
-        @UniqueConstraint(columnNames = "EMAIL"),
-        @UniqueConstraint(columnNames = "USERNAME") })
+@Table(name = "User", uniqueConstraints = { @UniqueConstraint(columnNames = "USER_ID"),
+        @UniqueConstraint(columnNames = "EMAIL"), @UniqueConstraint(columnNames = "USERNAME") })
 public class User implements Serializable {
     private static final long serialVersionUID = -4572727294954027970L;
 
@@ -44,7 +42,7 @@ public class User implements Serializable {
     @Column(name = "EMAIL", nullable = false, length = 100)
     private String email;
 
-    //TODO - Use MD5 hashing 
+    // TODO - Use MD5 hashing
     @Column(name = "PASSWORD", nullable = false)
     private String password;
 
@@ -169,8 +167,7 @@ public class User implements Serializable {
         return conflictOfInterestWithUsers;
     }
 
-    public void setConflictOfInterestWithUsers(
-            Category conflictOfInterestWithUsers) {
+    public void setConflictOfInterestWithUsers(Category conflictOfInterestWithUsers) {
         this.conflictOfInterestWithUsers = conflictOfInterestWithUsers;
     }
 
@@ -202,13 +199,11 @@ public class User implements Serializable {
         return conflictsOfInterest;
     }
 
-    public boolean setConflictsOfInterestWithUsers(
-            Set<User> conflictsOfInterestWithUsers) {
+    public boolean setConflictsOfInterestWithUsers(Set<User> conflictsOfInterestWithUsers) {
         return this.conflictsOfInterest.addAll(conflictsOfInterestWithUsers);
     }
 
-    public boolean addConflictsOfInterestWithUser(
-            User conflictsOfInterestWithUser) {
+    public boolean addConflictsOfInterestWithUser(User conflictsOfInterestWithUser) {
         return this.conflictsOfInterest.add(conflictsOfInterestWithUser);
     }
 
@@ -216,13 +211,11 @@ public class User implements Serializable {
         return userToMemberMappings;
     }
 
-    public void setUserToMemberMappings(
-            Set<UserToMemberMapping> userToMemberMappings) {
+    public void setUserToMemberMappings(Set<UserToMemberMapping> userToMemberMappings) {
         this.userToMemberMappings = userToMemberMappings;
     }
 
-    public boolean addUserToMemberMapping(
-            UserToMemberMapping userToMemberMapping) {
+    public boolean addUserToMemberMapping(UserToMemberMapping userToMemberMapping) {
         return this.userToMemberMappings.add(userToMemberMapping);
     }
 
@@ -233,5 +226,21 @@ public class User implements Serializable {
      */
     public boolean isValidUser() {
         return false;
+    }
+
+    /**
+     * Get the submitted document for given memberid, if there is any, otherwise
+     * return null
+     * 
+     * @param memberId
+     * @return
+     */
+    public Document getSubmissionDocumentForMemberId(final Long memberId) {
+        for (Document submission : this.submissions) {
+            if (memberId == submission.getSubmittedForMember().getId()) {
+                return submission;
+            }
+        }
+        return null;
     }
 }

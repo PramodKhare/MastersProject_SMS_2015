@@ -71,6 +71,11 @@ public class Document implements Serializable {
     @Column(name = "CMS_DOC_VERSION")
     private String cmsDocVersion;
 
+    /* Saving the submittedOnTimestamp by default */
+    public Document() {
+        submittedOnTimestamp = new Date();
+    }
+
     public Long getId() {
         return id;
     }
@@ -111,6 +116,10 @@ public class Document implements Serializable {
         this.submittedBy = submittedBy;
     }
 
+    public boolean addSubmittedBy(User submittedBy) {
+        return this.submittedBy.add(submittedBy);
+    }
+
     public Set<Evaluation> getEvaluations() {
         return evaluations;
     }
@@ -133,10 +142,6 @@ public class Document implements Serializable {
 
     public Date getSubmittedOnTimestamp() {
         return submittedOnTimestamp;
-    }
-
-    public void setSubmittedOnTimestamp(Date submittedOnTimestamp) {
-        this.submittedOnTimestamp = submittedOnTimestamp;
     }
 
     public String getFilename() {

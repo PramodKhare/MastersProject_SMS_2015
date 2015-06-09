@@ -1,9 +1,8 @@
 package edu.neu.ccis.sms.servlets;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -12,11 +11,27 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
+import org.apache.chemistry.opencmis.commons.enums.Action;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
+
+import edu.neu.ccis.sms.constants.SessionKeys;
+import edu.neu.ccis.sms.dao.categories.MemberDao;
+import edu.neu.ccis.sms.dao.categories.MemberDaoImpl;
+import edu.neu.ccis.sms.dao.submissions.DocumentDao;
+import edu.neu.ccis.sms.dao.submissions.DocumentDaoImpl;
+import edu.neu.ccis.sms.dao.users.UserDao;
+import edu.neu.ccis.sms.dao.users.UserDaoImpl;
+import edu.neu.ccis.sms.entity.categories.Member;
+import edu.neu.ccis.sms.entity.submissions.Document;
+import edu.neu.ccis.sms.entity.users.User;
+import edu.neu.ccis.sms.util.CMISConnector;
 
 /**
  * Servlet implementation class UploadForMember
@@ -42,12 +57,12 @@ public class UploadForMember extends HttpServlet {
         doPost(request, response);
     }
 
-    // location to store file uploaded
-    private final String UPLOAD_DIRECTORY = "F:/uploads";
-
     // upload settings
+    // sets memory threshold - beyond which files are stored in disk
     private static final int MEMORY_THRESHOLD = 1024 * 1024 * 5; // 5MB
+    // sets maximum size of upload file
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
+    // sets maximum size of request (include file + form data)
     private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 60; // 60MB
 
     /**
@@ -59,43 +74,33 @@ public class UploadForMember extends HttpServlet {
         // checks if the request actually contains upload file
         if (!ServletFileUpload.isMultipartContent(request)) {
             // if not, we stop here
-            PrintWriter writer = response.getWriter();
-            writer.println("Error: Form must has enctype=multipart/form-data.");
-            writer.flush();
+            System.out.println("Error: Form must have enctype=multipart/form-data.");
+            getServletContext().getRequestDispatcher("/pages/error.jsp").forward(request, response);
             return;
         }
 
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
+
+        String submittedFromRemoteAddress = request.getRemoteAddr();
+
         // configures upload settings
         DiskFileItemFactory factory = new DiskFileItemFactory();
-        // sets memory threshold - beyond which files are stored in disk
+        ServletFileUpload upload = new ServletFileUpload(factory);
         factory.setSizeThreshold(MEMORY_THRESHOLD);
+        upload.setFileSizeMax(MAX_FILE_SIZE);
+        upload.setSizeMax(MAX_REQUEST_SIZE);
+
         // sets temporary location to store files
         factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
 
-        ServletFileUpload upload = new ServletFileUpload(factory);
-
-        // sets maximum size of upload file
-        upload.setFileSizeMax(MAX_FILE_SIZE);
-
-        // sets maximum size of request (include file + form data)
-        upload.setSizeMax(MAX_REQUEST_SIZE);
-
-        // constructs the directory path to store upload file
-        // this path is relative to application's directory
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY;
-
-        // String uploadPath = UPLOAD_DIRECTORY;
-
-        // creates the directory if it does not exist
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdir();
-        }
-
         try {
             // parses the request's content to extract file data
-            @SuppressWarnings("unchecked")
             List<FileItem> formItems = upload.parseRequest(request);
+
+            String fileName = null;
+            File storeFile = null;
+            Long memberIdToUploadFor = null;
 
             if (formItems != null && formItems.size() > 0) {
                 // iterates over form's fields
@@ -103,28 +108,90 @@ public class UploadForMember extends HttpServlet {
                     // processes only fields that are not form fields
                     if (!item.isFormField()) {
                         System.out.println("Non-Form-Field - item.getName() - " + item.getName());
-                        // String fileName = new File(item.getName()).getName();
-                        String fileName = FilenameUtils.getName(item.getName());
+
+                        fileName = FilenameUtils.getName(item.getName());
                         String fileNameSuffix = FilenameUtils.getExtension(fileName);
-                        String filePath = uploadPath + File.separator + fileName;
-                        File storeFile = File.createTempFile(fileName, "." + fileNameSuffix);
-                        // File storeFile = new File(filePath);
+                        storeFile = File.createTempFile(fileName, "." + fileNameSuffix);
 
-                        String fieldname = item.getFieldName();
-
-                        InputStream filecontent = item.getInputStream();
-                        System.out.println("fieldname - " + fieldname + " - filename - " + fileName
-                                + " - storeFile Full Path - " + storeFile.getAbsolutePath());
                         // saves the file on disk
                         item.write(storeFile);
-                        request.setAttribute("message", "Upload has been done successfully!");
                     } else {
-                        System.out.println("item.getName() - " + item.getString() + " - item.getFieldName() - "
-                                + item.getFieldName());
+                        if (item.getFieldName().equals("memberId")) {
+                            memberIdToUploadFor = Long.parseLong(item.getString());
+                        }
                     }
                 }
                 // redirects client to message page
                 getServletContext().getRequestDispatcher("/pages/success.jsp").forward(request, response);
+            }
+
+            // Upload this file into CMS only if we have a valid memberId,
+            // uploaded file, filename from request
+            if (null != memberIdToUploadFor && null != storeFile && null != fileName) {
+                UserDao userDao = new UserDaoImpl();
+                User submitter = userDao.getUser(userId);
+
+                MemberDao memberDao = new MemberDaoImpl();
+                Member member = memberDao.getMember(memberIdToUploadFor);
+
+                String memberFolderPath = member.getCmsFolderPath();
+
+                // Create the email-id folder for given user if it doesn't exist
+                Folder submitterCMSFolder = CMISConnector.createFolder(memberFolderPath, submitter.getEmail());
+
+                DocumentDao docDao = new DocumentDaoImpl();
+                org.apache.chemistry.opencmis.client.api.Document doc = null;
+
+                // First check if user has already submitted for this
+                // member already - meaning is it a resubmission, then get the
+                // document reference
+                Document smsDoc = submitter.getSubmissionDocumentForMemberId(memberIdToUploadFor);
+
+                // If there is no previous submission by this user for this
+                // memberId
+                if (null == smsDoc) {
+                    // Upload the uploaded-file into CMS
+                    doc = CMISConnector.uploadToCMSUsingFileToFolder(submitterCMSFolder, fileName, storeFile);
+
+                    // Save the Document object into SMS database
+                    smsDoc = new Document();
+                    smsDoc.setFilename(fileName);
+                    smsDoc.setCmsDocContentUrl(doc.getContentUrl());
+                    smsDoc.setCmsDocId(doc.getId());
+                    smsDoc.setCmsDocumentPath(doc.getPaths().get(0));
+                    smsDoc.setCmsDocVersion(doc.getVersionLabel());
+                    smsDoc.setContentType((String) doc.getPropertyValue("cmis:contentStreamMimeType"));
+                    smsDoc.addSubmittedBy(submitter);
+                    smsDoc.setSubmittedForMember(member);
+                    smsDoc.setSubmittedFromRemoteAddress(submittedFromRemoteAddress);
+
+                    docDao.saveDocument(smsDoc);
+                } else {
+                    // Resubmission scenario - get previous Document reference
+                    // and update it with newer version
+                    doc = CMISConnector.getDocumentByPath(smsDoc.getCmsDocumentPath());
+
+                    // Check if we have CHECK_OUT permission
+                    if (null != doc && doc.getAllowableActions().getAllowableActions().contains(Action.CAN_CHECK_OUT)) {
+                        doc = CMISConnector.updateNewDocumentVersion(doc, fileName, storeFile);
+
+                        // Update the Document
+                        smsDoc.setFilename(fileName);
+                        smsDoc.setCmsDocContentUrl(doc.getContentUrl());
+                        smsDoc.setCmsDocId(doc.getId());
+                        smsDoc.setCmsDocumentPath(doc.getPaths().get(0));
+                        smsDoc.setCmsDocVersion(doc.getVersionLabel());
+                        smsDoc.setContentType((String) doc.getPropertyValue("cmis:contentStreamMimeType"));
+                        smsDoc.addSubmittedBy(submitter);
+                        smsDoc.setSubmittedForMember(member);
+                        smsDoc.setSubmittedFromRemoteAddress(submittedFromRemoteAddress);
+
+                        docDao.saveDocument(smsDoc);
+                    } else {
+                        throw new Exception("Unable to update document version");
+                    }
+                }
+                System.out.println("Successfully uploaded the document for Member! - " + doc.getPaths().get(0));
             }
         } catch (Exception ex) {
             request.setAttribute("message", "There was an error: " + ex.getMessage());
