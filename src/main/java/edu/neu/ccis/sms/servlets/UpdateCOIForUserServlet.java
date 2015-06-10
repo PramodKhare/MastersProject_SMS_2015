@@ -18,16 +18,16 @@ import edu.neu.ccis.sms.dao.users.UserDaoImpl;
 import edu.neu.ccis.sms.entity.users.User;
 
 /**
- * Servlet implementation class UpdateTOIForUserServlet
+ * Servlet implementation class UpdateCOIForUserServlet
  */
-@WebServlet(name = "UpdateTOIForUserServlet", urlPatterns = { "/UpdateTOIForUser" })
-public class UpdateTOIForUserServlet extends HttpServlet {
+@WebServlet(name = "UpdateCOIForUserServlet", urlPatterns = { "/UpdateCOIForUser" })
+public class UpdateCOIForUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public UpdateTOIForUserServlet() {
+    public UpdateCOIForUserServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -53,27 +53,27 @@ public class UpdateTOIForUserServlet extends HttpServlet {
             UserDao userDao = new UserDaoImpl();
             User one = userDao.getUser(userId);
 
-            Set<String> toiSet = one.getTopicsOfInterest();
-            // Remove the old topics of preferences
-            toiSet.clear();
+            Set<User> coiSet = one.getMyConflictsOfInterestWithUsers();
+            // Remove the old conflicts of interest
+            coiSet.clear();
             userDao.updateUser(one);
 
             Enumeration<String> paramNames = request.getParameterNames();
-            toiSet = new HashSet<String>();
+            coiSet = new HashSet<User>();
             while (paramNames.hasMoreElements()) {
                 String param = paramNames.nextElement();
-                if (param.startsWith("toifield")) {
-                    String topic = request.getParameter(param);
-                    toiSet.add(topic);
+                if (param.startsWith("coifield")) {
+                    String coiUserEmailId = request.getParameter(param);
+                    User coiUser = userDao.getUserByEmailId(coiUserEmailId);
+                    coiSet.add(coiUser);
                 }
             }
 
-            // Update the new topics of interest
-            one.setTopicsOfInterest(toiSet);
+            // Update the new conflicts of interest
+            one.setMyConflictsOfInterestWithUsers(coiSet);
             userDao.updateUser(one);
         } catch (final Exception e) {
             e.printStackTrace();
-
         }
     }
 }

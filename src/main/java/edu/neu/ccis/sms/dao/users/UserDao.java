@@ -30,4 +30,7 @@ public interface UserDao {
 
     public UserToMemberMapping registerUserForMember(User userId,
             Member memeber, RoleType role);
+
+    /* find user by email id */
+    public User getUserByEmailId(String userEmailId);
 }

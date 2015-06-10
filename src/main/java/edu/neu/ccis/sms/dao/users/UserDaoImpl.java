@@ -167,4 +167,18 @@ public class UserDaoImpl implements UserDao {
 
         return mapping;
     }
+
+    @Override
+    public User getUserByEmailId(String userEmailId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery("from User WHERE email = :email");
+        query.setParameter("email", userEmailId);
+        List<User> users = (List<User>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (users == null || users.isEmpty()) {
+            return null;
+        } else {
+            return users.get(0);
+        }
+    }
 }

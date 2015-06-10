@@ -1,10 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+    pageEncoding="UTF-8" import="edu.neu.ccis.sms.constants.SessionKeys,javax.servlet.http.HttpSession,java.util.*,javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.users.UserDao,edu.neu.ccis.sms.dao.users.UserDaoImpl,edu.neu.ccis.sms.entity.users.User"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%
+    /* Load all current Topics of interest */
+    Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
+    System.out.println("Session userId - "+userId);
+    
+    // Get the UserDaoImpl instance
+    UserDao userDao = new UserDaoImpl();
+    User one = userDao.getUser(userId);
+
+    Set<User> coiSet = one.getMyConflictsOfInterestWithUsers();
+
+    System.out.println("Total Number of coiSet - "+coiSet.size());
+%>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Update Topics of Interest</title>
+        <title>Update User's Conflicts of Interest</title>
         <style>
             body {
               font-family: 'Roboto', sans-serif;
@@ -25,11 +38,11 @@
                var input = document.createElement("input");
 
                input.setAttribute("type","text");
-               input.setAttribute("name","field" + i++ );
+               input.setAttribute("name","coifield" + i++ );
                input.setAttribute("value","");
                input.setAttribute("size","50");
                input.setAttribute("maxlength","254");
-               input.setAttribute("placeholder","Enter topics of interest");
+               input.setAttribute("placeholder","Enter user email-id");
 
                col1.appendChild(input);
                row.appendChild(col1);
@@ -47,13 +60,13 @@
         </script>
     </head>
     <body>
-        <div class="form_header">Update Topics of Interest</div>
+        <div class="form_header">Update Conflicts of Interest</div>
         <hr/>
-        <form action="<%=request.getContextPath()%>/UpdateTOIForUser" method="POST">
-            <label style="width:400px;display:inline-block;">Enter Topics of interest</label><br/>
-            <font size="2">(Important Note: Replaces old topics of interest with new ones)</font><br/>
+        <form action="<%=request.getContextPath()%>/UpdateCOIForUser" method="POST">
+            <label style="width:400px;display:inline-block;">Enter Conflicts of Interest</label><br/>
+            <font size="2">(Important Note: Replaces old conflicts of Interest with new ones)</font><br/>
             <table id="fieldTable">
-                <tr><td><input type="text" placeholder="Enter topics of interest" name="field0" value="" size=50 maxlength=254/></td></tr>
+                <tr><td><input type="text" placeholder="Enter conflicts of interest" name="coifield0" value="" size=50 maxlength=254/></td></tr>
             </table>
             <br/>
             <table>
