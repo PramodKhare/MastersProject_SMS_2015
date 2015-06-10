@@ -20,7 +20,7 @@ import edu.neu.ccis.sms.entity.users.User;
 
 @Entity
 @Table(name = "Evaluation", uniqueConstraints = { @UniqueConstraint(columnNames = "EVALUATION_ID") })
-public class Evaluation implements Serializable {
+public class Evaluation implements Serializable, Comparable<Evaluation> {
     private static final long serialVersionUID = -8527463008215351943L;
 
     @Id
@@ -92,5 +92,22 @@ public class Evaluation implements Serializable {
 
     public void setEvaluationFor(Document evaluationFor) {
         this.evaluationFor = evaluationFor;
+    }
+    
+    @Override
+    public int compareTo(Evaluation o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof Evaluation) {
+            Evaluation anotherEval = (Evaluation) anObject;
+            return (this.id.equals(anotherEval.id));
+        }
+        return false;
     }
 }

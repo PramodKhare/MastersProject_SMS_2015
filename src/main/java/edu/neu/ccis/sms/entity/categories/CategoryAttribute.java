@@ -15,7 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "CategoryAttribute", uniqueConstraints = { @UniqueConstraint(columnNames = "CATEGORY_ATTRIBUTE_ID") })
-public class CategoryAttribute implements Serializable {
+public class CategoryAttribute implements Serializable, Comparable<CategoryAttribute> {
     private static final long serialVersionUID = -9096909322421698016L;
 
     @Id
@@ -64,5 +64,21 @@ public class CategoryAttribute implements Serializable {
     public void setCategory(Category category) {
         this.category = category;
     }
+    
+    @Override
+    public int compareTo(CategoryAttribute o) {
+        return this.id.compareTo(o.getId());
+    }
 
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof CategoryAttribute) {
+            CategoryAttribute catAttr = (CategoryAttribute) anObject;
+            return (this.id.equals(catAttr.id));
+        }
+        return false;
+    }
 }

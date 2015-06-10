@@ -18,8 +18,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "Category", uniqueConstraints = { @UniqueConstraint(columnNames = "CATEGORY_ID") })
-public class Category implements Serializable {
+@Table(name = "Category", uniqueConstraints = { @UniqueConstraint(columnNames = "CATEGORY_ID"),
+        @UniqueConstraint(columnNames = "CATEGORY_NAME") })
+public class Category implements Serializable, Comparable<Category> {
     private static final long serialVersionUID = 3458910199790033297L;
 
     @Id
@@ -43,8 +44,7 @@ public class Category implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "parentCategory")
     private Set<Category> childCategories = new HashSet<Category>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL,
-            CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "category")
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "category")
     @Column(nullable = false)
     private Set<CategoryAttribute> attributes = new HashSet<CategoryAttribute>();
 
@@ -126,5 +126,22 @@ public class Category implements Serializable {
 
     public boolean addMembers(Member member) {
         return this.members.add(member);
+    }
+
+    @Override
+    public int compareTo(Category o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof Category) {
+            Category cat = (Category) anObject;
+            return (this.id.equals(cat.id) && this.name.equals(cat.name));
+        }
+        return false;
     }
 }

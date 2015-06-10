@@ -21,7 +21,7 @@ import edu.neu.ccis.sms.entity.submissions.Document;
 
 @Entity
 @Table(name = "Member", uniqueConstraints = { @UniqueConstraint(columnNames = "MEMBER_ID") })
-public class Member implements Serializable {
+public class Member implements Serializable, Comparable<Member> {
     private static final long serialVersionUID = -2408178701425545266L;
 
     @Id
@@ -200,5 +200,22 @@ public class Member implements Serializable {
     public boolean addUserToMemberMapping(
             UserToMemberMapping userToMemberMapping) {
         return this.userToMemberMappings.add(userToMemberMapping);
+    }
+    
+    @Override
+    public int compareTo(Member o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof Member) {
+            Member member = (Member) anObject;
+            return (this.id.equals(member.id));
+        }
+        return false;
     }
 }

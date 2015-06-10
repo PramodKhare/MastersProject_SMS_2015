@@ -27,7 +27,7 @@ import edu.neu.ccis.sms.entity.users.User;
 
 @Entity
 @Table(name = "Document", uniqueConstraints = { @UniqueConstraint(columnNames = "DOCUMENT_ID") })
-public class Document implements Serializable {
+public class Document implements Serializable, Comparable<Document> {
     private static final long serialVersionUID = 1407366847843408348L;
 
     @Id
@@ -174,5 +174,22 @@ public class Document implements Serializable {
 
     public void setCmsDocumentPath(String cmsDocumentPath) {
         this.cmsDocumentPath = cmsDocumentPath;
+    }
+
+    @Override
+    public int compareTo(Document o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof Document) {
+            Document anotherDoc = (Document) anObject;
+            return (this.id.equals(anotherDoc.id));
+        }
+        return false;
     }
 }

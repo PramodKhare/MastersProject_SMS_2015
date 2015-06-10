@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Team", uniqueConstraints = { @UniqueConstraint(columnNames = "TEAM_ID") })
-public class Team implements Serializable {
+public class Team implements Serializable, Comparable<Team> {
     private static final long serialVersionUID = -5099640508401022233L;
 
     @Id
@@ -56,5 +56,23 @@ public class Team implements Serializable {
 
     public boolean addTeammembers(User teammember) {
         return this.teammembers.add(teammember);
+    }
+    
+
+    @Override
+    public int compareTo(Team o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof Team) {
+            Team anotherTeam = (Team) anObject;
+            return (this.id.equals(anotherTeam.id));
+        }
+        return false;
     }
 }

@@ -7,10 +7,9 @@
     Long activeMemberId = (Long) session
             .getAttribute(SessionKeys.activeMemberId);
     System.out.println("Session activeMemberId - "+activeMemberId);
-
-    //TODO Remove once fully tested
+    
     activeMemberId = new Long(5);
-
+    
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
     Set<Member> SubmittableMembers = memberDao

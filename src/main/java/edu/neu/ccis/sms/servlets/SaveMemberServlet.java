@@ -13,8 +13,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.commons.lang.StringUtils;
 
+import edu.neu.ccis.sms.constants.SessionKeys;
 import edu.neu.ccis.sms.dao.categories.CategoryDao;
 import edu.neu.ccis.sms.dao.categories.CategoryDaoImpl;
 import edu.neu.ccis.sms.dao.categories.MemberDao;
@@ -22,6 +24,7 @@ import edu.neu.ccis.sms.dao.categories.MemberDaoImpl;
 import edu.neu.ccis.sms.entity.categories.Category;
 import edu.neu.ccis.sms.entity.categories.MemberAttribute;
 import edu.neu.ccis.sms.entity.categories.Member;
+import edu.neu.ccis.sms.util.CMISConnector;
 
 /**
  * Servlet implementation class SaveMemberServlet
@@ -83,7 +86,20 @@ public class SaveMemberServlet extends HttpServlet {
         }
 		newMember.setAttributes(memberAttributes);
 		
-		memberDao.saveMember(newMember);
+		Long userId = (Long) request.getSession().getAttribute(SessionKeys.keyUserId);
+		
+        // Create a Member Folder in CMS repo, check if its a top-level member
+        Folder cmsMemberFolder = null;
+        if (null == newMember.getParentMember()) {
+            cmsMemberFolder = CMISConnector.createFolderUnderRoot(newMember.getName());
+        } else {
+            cmsMemberFolder = CMISConnector.createFolder(newMember.getParentMember().getCmsFolderPath(),
+                    newMember.getName());
+        }
+        newMember.setCmsFolderId(cmsMemberFolder.getId());
+        newMember.setCmsFolderPath(cmsMemberFolder.getPath());
+        
+		memberDao.saveMember(newMember, userId);
 		
 		StringBuffer content = new StringBuffer();
 		content.append("Data updated into database");

@@ -4,28 +4,30 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import edu.neu.ccis.sms.entity.categories.Category;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
 import edu.neu.ccis.sms.entity.submissions.Document;
 
 @Entity
 @Table(name = "User", uniqueConstraints = { @UniqueConstraint(columnNames = "USER_ID"),
         @UniqueConstraint(columnNames = "EMAIL"), @UniqueConstraint(columnNames = "USERNAME") })
-public class User implements Serializable {
+public class User implements Serializable, Comparable<User> {
     private static final long serialVersionUID = -4572727294954027970L;
 
     @Id
@@ -69,15 +71,17 @@ public class User implements Serializable {
     private Set<Document> submissions = new HashSet<Document>();
 
     // TODO - Create a separate Topics entity with many-to-many relationship
-    @Transient
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_topics_of_interest", joinColumns = @JoinColumn(name = "USER_ID"))
+    @Column(name = "TOPICS_OF_INTEREST")
     private Set<String> topicsOfInterest = new HashSet<String>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COI_WITH_USER_ID", nullable = true)
-    private Category conflictOfInterestWithUsers;
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @JoinTable(name = "USER_CONFLICT_OF_INTEREST_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "CONFLICT_WITH_USER_ID") })
+    private Set<User> myConflictsOfInterestWithUsers = new HashSet<User>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "conflictOfInterestWithUsers")
-    private Set<User> conflictsOfInterest = new HashSet<User>();
+    @ManyToMany(mappedBy = "myConflictsOfInterestWithUsers", fetch = FetchType.EAGER)
+    private Set<User> usersForWhomMeInConflictOfInterest = new HashSet<User>();
 
     /** UserToMemberMapping many to one relationship */
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
@@ -163,14 +167,6 @@ public class User implements Serializable {
         this.status = status;
     }
 
-    public Category getConflictOfInterestWithUsers() {
-        return conflictOfInterestWithUsers;
-    }
-
-    public void setConflictOfInterestWithUsers(Category conflictOfInterestWithUsers) {
-        this.conflictOfInterestWithUsers = conflictOfInterestWithUsers;
-    }
-
     public Set<String> getTopicsOfInterest() {
         return topicsOfInterest;
     }
@@ -195,18 +191,6 @@ public class User implements Serializable {
         return this.submissions.add(submission);
     }
 
-    public Set<User> getConflictsOfInterest() {
-        return conflictsOfInterest;
-    }
-
-    public boolean setConflictsOfInterestWithUsers(Set<User> conflictsOfInterestWithUsers) {
-        return this.conflictsOfInterest.addAll(conflictsOfInterestWithUsers);
-    }
-
-    public boolean addConflictsOfInterestWithUser(User conflictsOfInterestWithUser) {
-        return this.conflictsOfInterest.add(conflictsOfInterestWithUser);
-    }
-
     public Set<UserToMemberMapping> getUserToMemberMappings() {
         return userToMemberMappings;
     }
@@ -217,6 +201,30 @@ public class User implements Serializable {
 
     public boolean addUserToMemberMapping(UserToMemberMapping userToMemberMapping) {
         return this.userToMemberMappings.add(userToMemberMapping);
+    }
+
+    public Set<User> getMyConflictsOfInterestWithUsers() {
+        return myConflictsOfInterestWithUsers;
+    }
+
+    public void setMyConflictsOfInterestWithUsers(Set<User> myConflictsOfInterestWithUsers) {
+        this.myConflictsOfInterestWithUsers = myConflictsOfInterestWithUsers;
+    }
+
+    public boolean addMyConflictsOfInterestWithUsers(User user) {
+        return this.myConflictsOfInterestWithUsers.add(user);
+    }
+
+    public Set<User> getUsersForWhomMeInConflictOfInterest() {
+        return usersForWhomMeInConflictOfInterest;
+    }
+
+    public void setUsersForWhomMeInConflictOfInterest(Set<User> usersForWhomMeInConflictOfInterest) {
+        this.usersForWhomMeInConflictOfInterest = usersForWhomMeInConflictOfInterest;
+    }
+
+    public boolean addUsersForWhomMeInConflictOfInterest(User user) {
+        return this.usersForWhomMeInConflictOfInterest.add(user);
     }
 
     /**
@@ -242,5 +250,23 @@ public class User implements Serializable {
             }
         }
         return null;
+    }
+
+    @Override
+    public int compareTo(User o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof User) {
+            User anotherUser = (User) anObject;
+            return (this.id.equals(anotherUser.id) && this.email.equals(anotherUser.email) && this.username
+                    .equals(anotherUser.username));
+        }
+        return false;
     }
 }

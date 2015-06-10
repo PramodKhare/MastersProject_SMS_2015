@@ -14,13 +14,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import edu.neu.ccis.sms.entity.users.RoleType;
+import edu.neu.ccis.sms.entity.users.StatusType;
 import edu.neu.ccis.sms.entity.users.User;
 
 @Entity
-@Table(name = "UserToMemberMapping")
-public class UserToMemberMapping implements Serializable {
+@Table(name = "UserToMemberMapping", uniqueConstraints = { @UniqueConstraint(columnNames = "ID") })
+public class UserToMemberMapping implements Serializable, Comparable<UserToMemberMapping> {
     private static final long serialVersionUID = -2755010302418223918L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +47,10 @@ public class UserToMemberMapping implements Serializable {
     @Column(name = "ISACTIVE", nullable = false)
     private boolean isActive = true;
 
+    /** Status of the Member Registration : nopass, waiting, active. */
+    @Column(name = "STATUS", nullable = false)
+    private StatusType status = StatusType.ACTIVE;
+
     public UserToMemberMapping() {
         // Automatically set the registered on datetime
         registeredOn = new Date();
@@ -56,6 +62,14 @@ public class UserToMemberMapping implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public StatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusType status) {
+        this.status = status;
     }
 
     public User getUser() {
@@ -92,5 +106,22 @@ public class UserToMemberMapping implements Serializable {
 
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+    
+    @Override
+    public int compareTo(UserToMemberMapping o) {
+        return this.id.compareTo(o.getId());
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+        if (anObject instanceof UserToMemberMapping) {
+            UserToMemberMapping mappings = (UserToMemberMapping) anObject;
+            return (this.id.equals(mappings.id));
+        }
+        return false;
     }
 }
