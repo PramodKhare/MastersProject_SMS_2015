@@ -53,27 +53,44 @@ public class UpdateCOIForUserServlet extends HttpServlet {
             UserDao userDao = new UserDaoImpl();
             User one = userDao.getUser(userId);
 
-            Set<User> coiSet = one.getMyConflictsOfInterestWithUsers();
-            // Remove the old conflicts of interest
-            coiSet.clear();
-            userDao.updateUser(one);
+            Set<User> oldCoiSet = one.getMyConflictsOfInterestWithUsers();
+
+            // Check what is the submitType of request
+            String submitType = request.getParameter("submitType");
 
             Enumeration<String> paramNames = request.getParameterNames();
-            coiSet = new HashSet<User>();
+            Set<User> newCoiSet = new HashSet<User>();
             while (paramNames.hasMoreElements()) {
                 String param = paramNames.nextElement();
                 if (param.startsWith("coifield")) {
                     String coiUserEmailId = request.getParameter(param);
                     User coiUser = userDao.getUserByEmailId(coiUserEmailId);
-                    coiSet.add(coiUser);
+                    if (coiUser != null) {
+                        newCoiSet.add(coiUser);
+                    }
                 }
             }
 
-            // Update the new conflicts of interest
-            one.setMyConflictsOfInterestWithUsers(coiSet);
-            userDao.updateUser(one);
+            // Default action is Replace the old topics with new ones
+            if (null == submitType || submitType.startsWith("Replace")) {
+                oldCoiSet.clear();
+                oldCoiSet.addAll(newCoiSet);
+                one.setMyConflictsOfInterestWithUsers(oldCoiSet);
+                userDao.updateUser(one);
+            } else if (submitType.startsWith("Clear")) {
+                // Remove the old conflicts of interest
+                oldCoiSet.clear();
+                one.setMyConflictsOfInterestWithUsers(oldCoiSet);
+                userDao.updateUser(one);
+            } else if (submitType.startsWith("Add")) {
+                oldCoiSet.addAll(newCoiSet);
+                one.setMyConflictsOfInterestWithUsers(oldCoiSet);
+                userDao.updateUser(one);
+            }
+            response.sendRedirect("pages/update_coi.jsp");
         } catch (final Exception e) {
             e.printStackTrace();
+            response.sendRedirect("pages/error.jsp");
         }
     }
 }
