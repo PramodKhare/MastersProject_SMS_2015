@@ -18,6 +18,14 @@ import javax.persistence.UniqueConstraint;
 
 import edu.neu.ccis.sms.entity.users.User;
 
+/**
+ * Hibernate Entity bean class for Evaluation; contains evaluation results for a
+ * Document by a single reviewer
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 7-June-2015
+ */
 @Entity
 @Table(name = "Evaluation", uniqueConstraints = { @UniqueConstraint(columnNames = "EVALUATION_ID") })
 public class Evaluation implements Serializable, Comparable<Evaluation> {
@@ -93,7 +101,7 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
     public void setEvaluationFor(Document evaluationFor) {
         this.evaluationFor = evaluationFor;
     }
-    
+
     @Override
     public int compareTo(Evaluation o) {
         return this.id.compareTo(o.getId());

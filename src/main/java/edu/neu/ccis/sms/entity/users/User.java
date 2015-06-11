@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -24,6 +23,15 @@ import javax.persistence.UniqueConstraint;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
 import edu.neu.ccis.sms.entity.submissions.Document;
 
+/**
+ * User Hibernate Entity bean class; contains all important information about
+ * user, his submissions and his member-registration mappings, and other
+ * personal information
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 @Entity
 @Table(name = "User", uniqueConstraints = { @UniqueConstraint(columnNames = "USER_ID"),
         @UniqueConstraint(columnNames = "EMAIL"), @UniqueConstraint(columnNames = "USERNAME") })
@@ -63,12 +71,15 @@ public class User implements Serializable, Comparable<User> {
     @Column(name = "STATUS", nullable = false)
     private StatusType status = StatusType.ACTIVE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TEAM_ID", nullable = true)
     private Team team;
 
     @ManyToMany(mappedBy = "submittedBy")
     private Set<Document> submissions = new HashSet<Document>();
+
+    @ManyToMany(mappedBy = "evaluators")
+    private Set<Document> documentsForEvaluation = new HashSet<Document>();
 
     // TODO - Create a separate Topics entity with many-to-many relationship
     @ElementCollection(fetch = FetchType.EAGER)
@@ -76,7 +87,7 @@ public class User implements Serializable, Comparable<User> {
     @Column(name = "TOPICS_OF_INTEREST")
     private Set<String> topicsOfInterest = new HashSet<String>();
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "USER_CONFLICT_OF_INTEREST_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = { @JoinColumn(name = "CONFLICT_WITH_USER_ID") })
     private Set<User> myConflictsOfInterestWithUsers = new HashSet<User>();
 
@@ -84,7 +95,7 @@ public class User implements Serializable, Comparable<User> {
     private Set<User> usersForWhomMeInConflictOfInterest = new HashSet<User>();
 
     /** UserToMemberMapping many to one relationship */
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     private Set<UserToMemberMapping> userToMemberMappings = new HashSet<UserToMemberMapping>();
 
     public Long getId() {
@@ -227,6 +238,18 @@ public class User implements Serializable, Comparable<User> {
         return this.usersForWhomMeInConflictOfInterest.add(user);
     }
 
+    public Set<Document> getDocumentsForEvaluation() {
+        return documentsForEvaluation;
+    }
+
+    public void setDocumentsForEvaluation(Set<Document> documentsForEvaluation) {
+        this.documentsForEvaluation = documentsForEvaluation;
+    }
+
+    public boolean addDocumentForEvaluation(Document document) {
+        return this.documentsForEvaluation.add(document);
+    }
+
     /**
      * Validate the current user object
      * 
@@ -234,22 +257,6 @@ public class User implements Serializable, Comparable<User> {
      */
     public boolean isValidUser() {
         return false;
-    }
-
-    /**
-     * Get the submitted document for given memberid, if there is any, otherwise
-     * return null
-     * 
-     * @param memberId
-     * @return
-     */
-    public Document getSubmissionDocumentForMemberId(final Long memberId) {
-        for (Document submission : this.submissions) {
-            if (memberId == submission.getSubmittedForMember().getId()) {
-                return submission;
-            }
-        }
-        return null;
     }
 
     @Override

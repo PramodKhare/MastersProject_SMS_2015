@@ -7,11 +7,16 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import edu.neu.ccis.sms.entity.categories.Member;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
-import edu.neu.ccis.sms.entity.users.User;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
+/**
+ * DAO implementation class for UserToMemberMappingDao interface
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 7-June-2015
+ */
 public class UserToMemberMappingDaoImpl implements UserToMemberMappingDao {
     private Session currentSession;
     private Transaction currentTransaction;

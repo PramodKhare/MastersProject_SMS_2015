@@ -20,6 +20,15 @@ import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.entity.users.StatusType;
 import edu.neu.ccis.sms.entity.users.User;
 
+/**
+ * Hibernate Entity bean class for UserToMemberMapping; Contain member to user
+ * mappings i.e. user is registered to which member and with which role, the
+ * registration status, time etc.
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 @Entity
 @Table(name = "UserToMemberMapping", uniqueConstraints = { @UniqueConstraint(columnNames = "ID") })
 public class UserToMemberMapping implements Serializable, Comparable<UserToMemberMapping> {
@@ -107,7 +116,7 @@ public class UserToMemberMapping implements Serializable, Comparable<UserToMembe
     public void setActive(boolean isActive) {
         this.isActive = isActive;
     }
-    
+
     @Override
     public int compareTo(UserToMemberMapping o) {
         return this.id.compareTo(o.getId());

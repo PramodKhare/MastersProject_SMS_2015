@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,6 +24,14 @@ import javax.persistence.UniqueConstraint;
 import edu.neu.ccis.sms.entity.categories.Member;
 import edu.neu.ccis.sms.entity.users.User;
 
+/**
+ * Hibernate Entity bean class for Document; Encompasses a submission done by
+ * user, resubmissions for a given member just update the old Document instance
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 7-June-2015
+ */
 @Entity
 @Table(name = "Document", uniqueConstraints = { @UniqueConstraint(columnNames = "DOCUMENT_ID") })
 public class Document implements Serializable, Comparable<Document> {
@@ -39,9 +46,13 @@ public class Document implements Serializable, Comparable<Document> {
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member submittedForMember;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "Document_submission_mapping", joinColumns = { @JoinColumn(name = "DOCUMENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "USER_ID") })
     private Set<User> submittedBy = new HashSet<User>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "Document_evaluators_mapping", joinColumns = { @JoinColumn(name = "DOCUMENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "USER_ID") })
+    private Set<User> evaluators = new HashSet<User>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "evaluationFor")
     private Set<Evaluation> evaluations = new HashSet<Evaluation>();
@@ -174,6 +185,18 @@ public class Document implements Serializable, Comparable<Document> {
 
     public void setCmsDocumentPath(String cmsDocumentPath) {
         this.cmsDocumentPath = cmsDocumentPath;
+    }
+
+    public Set<User> getEvaluators() {
+        return evaluators;
+    }
+
+    public void setEvaluators(Set<User> evaluators) {
+        this.evaluators = evaluators;
+    }
+
+    public boolean addEvaluator(User evaluator) {
+        return this.evaluators.add(evaluator);
     }
 
     @Override

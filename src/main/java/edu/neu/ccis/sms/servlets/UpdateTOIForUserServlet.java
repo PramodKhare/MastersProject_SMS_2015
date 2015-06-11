@@ -19,6 +19,10 @@ import edu.neu.ccis.sms.entity.users.User;
 
 /**
  * Servlet implementation class UpdateTOIForUserServlet
+ * 
+ * @author Pramod R. Khare
+ * @date 2-June-2015
+ * @lastUpdate 8-June-2015
  */
 @WebServlet(name = "UpdateTOIForUserServlet", urlPatterns = { "/UpdateTOIForUser" })
 public class UpdateTOIForUserServlet extends HttpServlet {

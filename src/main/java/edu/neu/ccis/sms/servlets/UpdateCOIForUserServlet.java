@@ -19,6 +19,10 @@ import edu.neu.ccis.sms.entity.users.User;
 
 /**
  * Servlet implementation class UpdateCOIForUserServlet
+ * 
+ * @author Pramod R. Khare
+ * @date 6-June-2015
+ * @lastUpdate 10-June-2015
  */
 @WebServlet(name = "UpdateCOIForUserServlet", urlPatterns = { "/UpdateCOIForUser" })
 public class UpdateCOIForUserServlet extends HttpServlet {
@@ -65,6 +69,7 @@ public class UpdateCOIForUserServlet extends HttpServlet {
                 if (param.startsWith("coifield")) {
                     String coiUserEmailId = request.getParameter(param);
                     User coiUser = userDao.getUserByEmailId(coiUserEmailId);
+                    // Make sure that its a valid user and that user is not himself
                     if (coiUser != null) {
                         newCoiSet.add(coiUser);
                     }

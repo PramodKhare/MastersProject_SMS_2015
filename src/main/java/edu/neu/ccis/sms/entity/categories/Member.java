@@ -19,6 +19,15 @@ import javax.persistence.UniqueConstraint;
 
 import edu.neu.ccis.sms.entity.submissions.Document;
 
+/**
+ * Hibernate Entity bean class for Member; Members are simply instances of a
+ * Category
+ * 
+ * @author Pramod R. Khare
+ * @modifedBy Swapnil Gupta
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 @Entity
 @Table(name = "Member", uniqueConstraints = { @UniqueConstraint(columnNames = "MEMBER_ID") })
 public class Member implements Serializable, Comparable<Member> {
@@ -56,8 +65,7 @@ public class Member implements Serializable, Comparable<Member> {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentMember", cascade = CascadeType.ALL)
     private Set<Member> childMembers = new HashSet<Member>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL,
-            CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "member")
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "member")
     @Column(nullable = false)
     private Set<MemberAttribute> attributes = new HashSet<MemberAttribute>();
 
@@ -192,16 +200,14 @@ public class Member implements Serializable, Comparable<Member> {
         return userToMemberMappings;
     }
 
-    public void setUserToMemberMappings(
-            Set<UserToMemberMapping> userToMemberMappings) {
+    public void setUserToMemberMappings(Set<UserToMemberMapping> userToMemberMappings) {
         this.userToMemberMappings = userToMemberMappings;
     }
 
-    public boolean addUserToMemberMapping(
-            UserToMemberMapping userToMemberMapping) {
+    public boolean addUserToMemberMapping(UserToMemberMapping userToMemberMapping) {
         return this.userToMemberMappings.add(userToMemberMapping);
     }
-    
+
     @Override
     public int compareTo(Member o) {
         return this.id.compareTo(o.getId());

@@ -26,6 +26,13 @@ import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 
+/**
+ * Utility class for CMIS opeations for CMS repository
+ * 
+ * @author Pramod R. Khare
+ * @date 8-May-2015
+ * @lastUpdate 10-June-2015
+ */
 public class CMISConnector {
     // Connect to CMS repository and get the session
     private static final Session session = connectToRepository();

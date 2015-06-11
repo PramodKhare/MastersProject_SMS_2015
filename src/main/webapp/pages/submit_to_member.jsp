@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"
-    import="edu.neu.ccis.sms.constants.SessionKeys,javax.servlet.http.HttpSession,java.util.*,javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.categories.MemberDao,edu.neu.ccis.sms.dao.categories.MemberDaoImpl,edu.neu.ccis.sms.entity.categories.Member"%>
+    import="edu.neu.ccis.sms.constants.SessionKeys,javax.servlet.http.HttpSession,
+    java.util.*,javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.categories.MemberDao,
+    edu.neu.ccis.sms.dao.categories.MemberDaoImpl,edu.neu.ccis.sms.entity.categories.Member"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%
     /* Load all the submittable Member Details */
@@ -9,7 +11,7 @@
     System.out.println("Session activeMemberId - "+activeMemberId);
 
     //TODO Remove once fully tested
-    activeMemberId = new Long(5);
+    activeMemberId = new Long(2);
 
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();

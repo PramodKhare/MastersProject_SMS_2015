@@ -9,6 +9,13 @@ import org.hibernate.Transaction;
 import edu.neu.ccis.sms.entity.submissions.Document;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
+/**
+ * DAO implementation class for Document Entity bean
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 public class DocumentDaoImpl implements DocumentDao {
     private Session currentSession;
     private Transaction currentTransaction;

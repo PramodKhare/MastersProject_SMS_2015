@@ -15,6 +15,10 @@ import edu.neu.ccis.sms.entity.users.User;
 
 /**
  * Servlet implementation class RegisterUser
+ * 
+ * @author Pramod R. Khare
+ * @date 28-May-2015
+ * @lastUpdate 1-June-2015
  */
 @WebServlet("/RegisterUser")
 public class RegisterUser extends HttpServlet {

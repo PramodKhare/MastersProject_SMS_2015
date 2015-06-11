@@ -16,6 +16,10 @@ import edu.neu.ccis.sms.entity.users.User;
 
 /**
  * Servlet implementation class LoginServlet
+ * 
+ * @author Pramod R. Khare
+ * @date 18-May-2015
+ * @lastUpdate 3-June-2015
  */
 @WebServlet("/Login")
 public class LoginServlet extends HttpServlet {

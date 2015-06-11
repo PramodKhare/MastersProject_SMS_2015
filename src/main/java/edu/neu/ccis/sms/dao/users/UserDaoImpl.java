@@ -18,6 +18,13 @@ import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.entity.users.User;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
+/**
+ * DAO implementation class for User Entity bean
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 public class UserDaoImpl implements UserDao {
     private Session currentSession;
     private Transaction currentTransaction;
@@ -173,6 +180,56 @@ public class UserDaoImpl implements UserDao {
         openCurrentSessionwithTransaction();
         Query query = getCurrentSession().createQuery("from User WHERE email = :email");
         query.setParameter("email", userEmailId);
+        List<User> users = (List<User>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (users == null || users.isEmpty()) {
+            return null;
+        } else {
+            return users.get(0);
+        }
+    }
+
+    @Override
+    public User getUserByIdWithSubmissions(final Long userId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery(
+                "select u from User u left join fetch u.submissions where u.id = :id");
+        query.setParameter("id", userId);
+        List<User> users = (List<User>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (users == null || users.isEmpty()) {
+            return null;
+        } else {
+            return users.get(0);
+        }
+    }
+
+    /**
+     * Get the submitted document for given memberid, if there is any, otherwise
+     * return null
+     * 
+     * @param memberId
+     * @return
+     */
+    public Document getSubmissionDocumentForMemberIdByUserId(Long userId, Long memberIdToUploadFor) {
+        User user = getUserByIdWithSubmissions(userId);
+        if (user == null) {
+            return null;
+        }
+        for (Document submission : user.getSubmissions()) {
+            if (memberIdToUploadFor == submission.getSubmittedForMember().getId()) {
+                return submission;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public User getUserByIdWithDocumentsForEvaluation(Long userId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery(
+                "select u from User u left join fetch u.documentsForEvaluation where u.id = :id");
+        query.setParameter("id", userId);
         List<User> users = (List<User>) query.list();
         closeCurrentSessionwithTransaction();
         if (users == null || users.isEmpty()) {

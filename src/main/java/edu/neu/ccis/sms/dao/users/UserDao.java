@@ -4,9 +4,17 @@ import java.util.List;
 
 import edu.neu.ccis.sms.entity.categories.Member;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
+import edu.neu.ccis.sms.entity.submissions.Document;
 import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.entity.users.User;
 
+/**
+ * DAO interface class for User Entity bean
+ * 
+ * @author Pramod R. Khare
+ * @date 9-May-2015
+ * @lastUpdate 10-June-2015
+ */
 public interface UserDao {
     public List<User> getAllUser();
 
@@ -33,4 +41,13 @@ public interface UserDao {
 
     /* find user by email id */
     public User getUserByEmailId(String userEmailId);
+
+    /* Get user by UserId along with all his submissions */
+    public User getUserByIdWithSubmissions(final Long userId);
+
+    /* Get user by UserId along with all documents for evaluation */
+    public User getUserByIdWithDocumentsForEvaluation(final Long userId);
+
+    /* Get the Submission Document reference by userId for given MemberId */
+    public Document getSubmissionDocumentForMemberIdByUserId(Long userId, Long memberIdToUploadFor);
 }
