@@ -79,7 +79,7 @@
 				</tr>
 				<tr>
 	                <td class='label'>Select number of evaluators per submission:</td>
-	                <td><select id="numberOfEvaluators" name="numberOfEvaluators" style="width: 300px;">
+	                <td><select id="numberOfEvaluatorsPerSub" name="numberOfEvaluatorsPerSub" style="width: 300px;">
 	                        <%
 	                            for (int i=1; i<=evaluators.size(); i++) {
 	                                out.println("<option value=" + i + ">" + i + "</option>");

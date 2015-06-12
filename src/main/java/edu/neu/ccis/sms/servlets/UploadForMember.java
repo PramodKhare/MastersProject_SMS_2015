@@ -197,12 +197,12 @@ public class UploadForMember extends HttpServlet {
                 System.out.println("Successfully uploaded the document for Member! - " + doc.getPaths().get(0));
             }
             // redirects client to message page
-            getServletContext().getRequestDispatcher("/pages/submit_to_member.jsp").forward(request, response);
+            response.sendRedirect("pages/submit_to_member.jsp");
         } catch (Exception ex) {
             request.setAttribute("message", "There was an error: " + ex.getMessage());
             // redirects client to message page
             System.out.println(ex.getMessage());
-            getServletContext().getRequestDispatcher("/pages/error.jsp").forward(request, response);
+            response.sendRedirect("pages/error.jsp");
         }
     }
 }

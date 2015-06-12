@@ -16,6 +16,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -56,6 +57,13 @@ public class Document implements Serializable, Comparable<Document> {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "evaluationFor")
     private Set<Evaluation> evaluations = new HashSet<Evaluation>();
+
+    // Unidiretional one-to-one mapping for final Evaluation of this document
+    // Final Evaluation of document can be average of multiple evaluations done
+    // by multiple reviewers or evaluators
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FINAL_EVAL_ID", unique = true, nullable = true, insertable = true, updatable = true)
+    private Evaluation finalEvaluation;
 
     @Column(name = "SUBMITTED_FROM")
     private String submittedFromRemoteAddress;
@@ -109,6 +117,14 @@ public class Document implements Serializable, Comparable<Document> {
 
     public void setCmsDocContentUrl(String cmsDocContentUrl) {
         this.cmsDocContentUrl = cmsDocContentUrl;
+    }
+
+    public Evaluation getFinalEvaluation() {
+        return finalEvaluation;
+    }
+
+    public void setFinalEvaluation(Evaluation finalEvaluation) {
+        this.finalEvaluation = finalEvaluation;
     }
 
     public Member getSubmittedForMember() {

@@ -194,7 +194,7 @@ public class UserDaoImpl implements UserDao {
         openCurrentSessionwithTransaction();
         Query query = getCurrentSession().createQuery(
                 "select u from User u left join fetch u.submissions where u.id = :id");
-        query.setParameter("id", userId);
+        query.setParameter("userId", userId);
         List<User> users = (List<User>) query.list();
         closeCurrentSessionwithTransaction();
         if (users == null || users.isEmpty()) {
@@ -229,6 +229,36 @@ public class UserDaoImpl implements UserDao {
         openCurrentSessionwithTransaction();
         Query query = getCurrentSession().createQuery(
                 "select u from User u left join fetch u.documentsForEvaluation where u.id = :id");
+        query.setParameter("id", userId);
+        List<User> users = (List<User>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (users == null || users.isEmpty()) {
+            return null;
+        } else {
+            return users.get(0);
+        }
+    }
+
+    @Override
+    public User getUserByIdWithAllocatedEvaluatorsMappings(final Long userId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery(
+                "select u from User u left join fetch u.allocatedEvaluators where u.id = :id");
+        query.setParameter("id", userId);
+        List<User> users = (List<User>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (users == null || users.isEmpty()) {
+            return null;
+        } else {
+            return users.get(0);
+        }
+    }
+
+    @Override
+    public User getUserByIdWithSubmittersToEvaluateMappings(final Long userId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery(
+                "select u from User u left join fetch u.submittersToEvaluate where u.id = :id");
         query.setParameter("id", userId);
         List<User> users = (List<User>) query.list();
         closeCurrentSessionwithTransaction();

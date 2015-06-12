@@ -98,12 +98,43 @@ public class User implements Serializable, Comparable<User> {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     private Set<UserToMemberMapping> userToMemberMappings = new HashSet<UserToMemberMapping>();
 
+    // user to reviewer mapping - as many to many mappings
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "submitter")
+    private Set<UserToReviewerMapping> allocatedEvaluators = new HashSet<UserToReviewerMapping>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "evaluator")
+    private Set<UserToReviewerMapping> submittersToEvaluate = new HashSet<UserToReviewerMapping>();
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Set<UserToReviewerMapping> getAllocatedEvaluators() {
+        return allocatedEvaluators;
+    }
+
+    public void setAllocatedEvaluators(Set<UserToReviewerMapping> allocatedEvaluators) {
+        this.allocatedEvaluators = allocatedEvaluators;
+    }
+
+    public boolean addAllocatedEvaluator(UserToReviewerMapping allocatedEvaluator) {
+        return this.allocatedEvaluators.add(allocatedEvaluator);
+    }
+
+    public Set<UserToReviewerMapping> getSubmittersToEvaluate() {
+        return submittersToEvaluate;
+    }
+
+    public void setSubmittersToEvaluate(Set<UserToReviewerMapping> submittersToEvaluate) {
+        this.submittersToEvaluate = submittersToEvaluate;
+    }
+
+    public boolean addSubmitterToEvaluate(UserToReviewerMapping submitterToEvaluate) {
+        return this.submittersToEvaluate.add(submitterToEvaluate);
     }
 
     public Team getTeam() {
@@ -276,4 +307,10 @@ public class User implements Serializable, Comparable<User> {
         }
         return false;
     }
+
+    /* Hashcode method */
+    /*
+     * public int hashCode() { final int prime = 31; int hash = 17; hash = hash
+     * * prime + ((int) (this.id ^ (this.id>>> 32))); return hash; }
+     */
 }

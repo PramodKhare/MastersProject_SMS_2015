@@ -42,6 +42,9 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
     @Column(name = "TOTAL", nullable = false)
     private Float outOfTotal;
 
+    @Column(name = "COMMENTS", nullable = true)
+    private String comments;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "EVALUATED_ON", nullable = false)
     private Date evaluatedOnTimestamp;
@@ -84,6 +87,14 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
 
     public void setEvaluatedOnTimestamp(Date evaluatedOnTimestamp) {
         this.evaluatedOnTimestamp = evaluatedOnTimestamp;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public User getEvaluatedBy() {

@@ -33,11 +33,9 @@ public interface UserDao {
     public User findUserByUsernameAndPassword(String username, String password);
 
     // register for member
-    public UserToMemberMapping registerUserForMember(Long userId,
-            Long memeberId, RoleType role);
+    public UserToMemberMapping registerUserForMember(Long userId, Long memeberId, RoleType role);
 
-    public UserToMemberMapping registerUserForMember(User userId,
-            Member memeber, RoleType role);
+    public UserToMemberMapping registerUserForMember(User userId, Member memeber, RoleType role);
 
     /* find user by email id */
     public User getUserByEmailId(String userEmailId);
@@ -50,4 +48,8 @@ public interface UserDao {
 
     /* Get the Submission Document reference by userId for given MemberId */
     public Document getSubmissionDocumentForMemberIdByUserId(Long userId, Long memberIdToUploadFor);
+
+    public User getUserByIdWithAllocatedEvaluatorsMappings(final Long userId);
+
+    public User getUserByIdWithSubmittersToEvaluateMappings(final Long userId);
 }

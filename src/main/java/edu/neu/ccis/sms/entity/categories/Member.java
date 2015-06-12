@@ -78,7 +78,7 @@ public class Member implements Serializable, Comparable<Member> {
     private Set<Document> submissions = new HashSet<Document>();
 
     // member to user many to many mappings
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "member")
     @Column(nullable = false)
     private Set<UserToMemberMapping> userToMemberMappings = new HashSet<UserToMemberMapping>();
 
