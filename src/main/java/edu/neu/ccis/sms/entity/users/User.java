@@ -308,6 +308,75 @@ public class User implements Serializable, Comparable<User> {
         return false;
     }
 
+    /**
+     * Get user's role for given member is RoleType.EVALUATOR then returns true
+     * else returns false
+     * 
+     * @NOTE: Use this method if "userToMemberMappings" is populated, because its lazily loaded
+     * @param memberId
+     * @return
+     */
+    public boolean isEvaluatorForMemberId(final Long memberId) {
+        for (UserToMemberMapping mapping : this.userToMemberMappings) {
+            if (mapping.getMember().getId() == memberId && mapping.getRole() == RoleType.EVALUATOR) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get user's role for given member is RoleType.CONDUCTOR then returns true
+     * else returns false
+     * 
+     * @NOTE: Use this method if "userToMemberMappings" is populated, because its lazily loaded
+     * @param memberId
+     * @return
+     */
+    public boolean isConductorForMemberId(final Long memberId) {
+        for (UserToMemberMapping mapping : this.userToMemberMappings) {
+            if (mapping.getMember().getId() == memberId && mapping.getRole() == RoleType.CONDUCTOR) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get user's role for given member is RoleType.SUBMITTER then returns true
+     * else returns false
+     * 
+     * @NOTE: Use this method if "userToMemberMappings" is populated, because its lazily loaded
+     * @param memberId
+     * @return
+     */
+    public boolean isSubmitterForMemberId(final Long memberId) {
+        for (UserToMemberMapping mapping : this.userToMemberMappings) {
+            if (mapping.getMember().getId() == memberId && mapping.getRole() == RoleType.SUBMITTER) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get submitters to evaluate for given memberId
+     * 
+     * @NOTE: Use this method if "submittersToEvaluate" is populated, because its lazily loaded
+     * @param memberId
+     * @return Set<User> users which are allocated for this evaluator to
+     *         evaluate for given memberId
+     */
+    public Set<User> getSubmittersToEvaluateForMemberId(final Long memberId) {
+        Set<User> submitters = new HashSet<User>();
+        for (UserToReviewerMapping mapping : this.submittersToEvaluate) {
+            if (mapping.getEvaluationForMemberId() == memberId) {
+                submitters.add(mapping.getSubmitter());
+            }
+        }
+        return submitters;
+    }
+
     /* Hashcode method */
     /*
      * public int hashCode() { final int prime = 31; int hash = 17; hash = hash

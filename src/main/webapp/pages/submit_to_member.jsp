@@ -15,10 +15,11 @@
 
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
-    Set<Member> SubmittableMembers = memberDao
+    Set<Member> members = memberDao
             .findAllSubmittableMembersByParentMemberId(activeMemberId);
-    
-    System.out.println("Total Number of submittables - "+SubmittableMembers.size());
+    List<Member> submittableMembers = new ArrayList<Member>(members);
+    Collections.sort(submittableMembers);
+    System.out.println("Total Number of submittables - "+submittableMembers.size());
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -59,7 +60,7 @@
                     <option value="7">Assignment 4</option>
                     -->
                     <% 
-                        for (Member member : SubmittableMembers) {
+                        for (Member member : submittableMembers) {
                             out.println("<option value=" + member.getId() + ">"
                                     + member.getName() + "</option>");
                         }

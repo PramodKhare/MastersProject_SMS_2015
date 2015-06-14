@@ -194,7 +194,7 @@ public class UserDaoImpl implements UserDao {
         openCurrentSessionwithTransaction();
         Query query = getCurrentSession().createQuery(
                 "select u from User u left join fetch u.submissions where u.id = :id");
-        query.setParameter("userId", userId);
+        query.setParameter("id", userId);
         List<User> users = (List<User>) query.list();
         closeCurrentSessionwithTransaction();
         if (users == null || users.isEmpty()) {

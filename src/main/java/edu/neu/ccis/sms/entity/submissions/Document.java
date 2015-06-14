@@ -43,7 +43,7 @@ public class Document implements Serializable, Comparable<Document> {
     @Column(name = "DOCUMENT_ID", unique = true, nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MEMBER_ID", nullable = false)
     private Member submittedForMember;
 

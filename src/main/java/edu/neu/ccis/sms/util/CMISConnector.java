@@ -1,6 +1,5 @@
 package edu.neu.ccis.sms.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -169,7 +168,7 @@ public class CMISConnector {
      * @throws Exception
      */
     public static Document uploadToCMSUsingFileToFolderPath(final String parentFolderPath, final String fileName,
-            final String fileType, final File file) throws Exception {
+            String fileType, final File file) throws Exception {
 
         Map<String, Object> props = null;
         Folder parentFolder = null;
@@ -184,6 +183,9 @@ public class CMISConnector {
             props.put("cmis:objectTypeId", "cmis:document");
             props.put("cmis:name", fileName);
 
+            if(fileType == null){
+                fileType = "application/octet-stream";
+            }
             contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                     new FileInputStream(file));
 
@@ -240,7 +242,7 @@ public class CMISConnector {
      * @throws Exception
      */
     public static Document uploadToCMSUsingFileToFolder(final Folder parentFolder, final String fileName,
-            final String fileType, final File file) throws Exception {
+            String fileType, final File file) throws Exception {
 
         Map<String, Object> props = null;
         Document document = null;
@@ -250,6 +252,10 @@ public class CMISConnector {
             props = new HashMap<String, Object>();
             props.put("cmis:objectTypeId", "cmis:document");
             props.put("cmis:name", fileName);
+
+            if(fileType == null){
+                fileType = "application/octet-stream";
+            }
 
             contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                     new FileInputStream(file));
@@ -332,6 +338,10 @@ public class CMISConnector {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put("cmis:objectTypeId", "cmis:document");
         props.put("cmis:name", fileName);
+
+        if(fileType == null){
+            fileType = "application/octet-stream";
+        }
 
         ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                 new FileInputStream(file));

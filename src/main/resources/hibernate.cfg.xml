@@ -28,6 +28,7 @@
 		<mapping class="edu.neu.ccis.sms.entity.categories.MemberAttribute" />
 		<mapping class="edu.neu.ccis.sms.entity.categories.Post" />
         <mapping class="edu.neu.ccis.sms.entity.categories.UserToMemberMapping"/>
+        <mapping class="edu.neu.ccis.sms.entity.users.UserToReviewerMapping" />
         <mapping class="edu.neu.ccis.sms.entity.submissions.Document" />
 		<mapping class="edu.neu.ccis.sms.entity.submissions.Evaluation" />
 		
