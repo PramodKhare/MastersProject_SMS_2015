@@ -7,7 +7,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import edu.neu.ccis.sms.entity.users.User;
 import edu.neu.ccis.sms.entity.users.UserToReviewerMapping;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
@@ -117,7 +116,6 @@ public class UserToReviewerMappingDaoImpl implements UserToReviewerMappingDao {
         if (mappings != null && !mappings.isEmpty()) {
             for (UserToReviewerMapping m : mappings) {
                 deleteUserToReviewerMapping(m);
-                System.out.println("UserToReviewerMapping deleted- " + m.getId());
             }
         }
     }

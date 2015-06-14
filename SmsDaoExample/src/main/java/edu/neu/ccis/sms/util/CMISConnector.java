@@ -1,6 +1,5 @@
 package edu.neu.ccis.sms.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,6 +17,7 @@ import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
+import org.apache.chemistry.opencmis.client.util.FileUtils;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
@@ -26,6 +26,13 @@ import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 
+/**
+ * Utility class for CMIS opeations for CMS repository
+ * 
+ * @author Pramod R. Khare
+ * @date 8-May-2015
+ * @lastUpdate 10-June-2015
+ */
 public class CMISConnector {
     // Connect to CMS repository and get the session
     private static final Session session = connectToRepository();
@@ -162,7 +169,7 @@ public class CMISConnector {
      * @throws Exception
      */
     public static Document uploadToCMSUsingFileToFolderPath(final String parentFolderPath, final String fileName,
-            final String fileType, final File file) throws Exception {
+            String fileType, final File file) throws Exception {
 
         Map<String, Object> props = null;
         Folder parentFolder = null;
@@ -177,6 +184,9 @@ public class CMISConnector {
             props.put("cmis:objectTypeId", "cmis:document");
             props.put("cmis:name", fileName);
 
+            if (fileType == null) {
+                fileType = "application/octet-stream";
+            }
             contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                     new FileInputStream(file));
 
@@ -233,7 +243,7 @@ public class CMISConnector {
      * @throws Exception
      */
     public static Document uploadToCMSUsingFileToFolder(final Folder parentFolder, final String fileName,
-            final String fileType, final File file) throws Exception {
+            String fileType, final File file) throws Exception {
 
         Map<String, Object> props = null;
         Document document = null;
@@ -243,6 +253,10 @@ public class CMISConnector {
             props = new HashMap<String, Object>();
             props.put("cmis:objectTypeId", "cmis:document");
             props.put("cmis:name", fileName);
+
+            if (fileType == null) {
+                fileType = "application/octet-stream";
+            }
 
             contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                     new FileInputStream(file));
@@ -326,6 +340,10 @@ public class CMISConnector {
         props.put("cmis:objectTypeId", "cmis:document");
         props.put("cmis:name", fileName);
 
+        if (fileType == null) {
+            fileType = "application/octet-stream";
+        }
+
         ContentStream contentStream = session.getObjectFactory().createContentStream(fileName, file.length(), fileType,
                 new FileInputStream(file));
         ObjectId objectId = workingCopy.checkIn(true, props, contentStream, "Resubmission!");
@@ -333,5 +351,16 @@ public class CMISConnector {
         System.out.println("Version label is now:" + doc.getVersionLabel());
 
         return doc;
+    }
+
+    /**
+     * Download the document to local disk from CMS repo
+     * 
+     * @param docId
+     * @param destinationPath
+     * @throws IOException
+     */
+    public static void downloadDocument(final String docId, final String destinationPath) throws IOException {
+        FileUtils.download(docId, destinationPath, session);
     }
 }

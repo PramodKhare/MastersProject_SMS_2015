@@ -1,6 +1,5 @@
 package edu.neu.ccis.sms.servlets;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -74,25 +73,44 @@ public class DocumentRetrievalServlet extends HttpServlet {
 
             File tempDir = new File(System.getProperty("java.io.tmpdir"));
             File solutionsDir = new File(tempDir.getAbsolutePath() + File.separator + "solutions");
+
+            // Clean any previous solution download directories, if any
+            if (solutionsDir.exists()) {
+                System.out.println("Deleting the previous Solutions tmp directory!");
+                FileUtils.deleteDirectory(solutionsDir);
+            }
+
             solutionsDir.mkdirs();
 
             for (User user : evaluateSubmitters) {
-                Document doc = userDao.getSubmissionDocumentForMemberIdByUserId(user.getId(), memberId);
+                System.out.println("Downloading document user - " + user.getEmail());
+                Document doc = null;
+                try {
+                    doc = userDao.getSubmissionDocumentForMemberIdByUserId(user.getId(), memberId);
 
-                // Create a necessary folder structure and then download the
-                // submission document there
-                File dir = new File(solutionsDir.getAbsolutePath() + File.separator + user.getEmail());
-                dir.mkdirs();
+                    // Create a necessary folder structure and then download the
+                    // submission document there
+                    File dir = new File(solutionsDir.getAbsolutePath() + File.separator + user.getEmail());
+                    dir.mkdirs();
 
-                CMISConnector.downloadDocument(doc.getCmsDocId(), dir.getAbsolutePath());
+                    // Create file inside this directory with submission file
+                    // name
+                    File file = new File(dir.getAbsolutePath() + File.separator + doc.getFilename());
+                    file.createNewFile();
+
+                    CMISConnector.downloadDocument(doc.getCmsDocId(), file.getAbsolutePath());
+                } catch (final Exception e) {
+                    System.out.println("Unable to download document - " + doc.getFilename());
+                    e.printStackTrace();
+                }
             }
 
-            String[] files = solutionsDir.list();
+            System.out.println("Document submissions downloaded successfully from CMS!!");
 
             // Checks to see if the directory contains some files.
-            if (files != null && files.length > 0) {
+            if (solutionsDir != null && solutionsDir.list().length > 0) {
                 // Call the zipFiles method for creating a zip stream.
-                byte[] zip = zipFiles(solutionsDir, files);
+                byte[] zip = zipFiles(solutionsDir);
 
                 // Sends the response back to the user / browser. The content
                 // for zip file type is "application/zip". We also set the
@@ -105,10 +123,11 @@ public class DocumentRetrievalServlet extends HttpServlet {
 
                 sos.write(zip);
                 sos.flush();
+                System.out.println("zip downloaded successfully!!");
             }
 
             // TODO Cleanup the files which were downloaded
-            // FileUtils.deleteDirectory(solutionsDir);
+            FileUtils.deleteDirectory(solutionsDir);
 
             System.out.println("Submissions downloaded successfully for evaluation!!");
         } catch (Exception ex) {
@@ -122,30 +141,43 @@ public class DocumentRetrievalServlet extends HttpServlet {
     /**
      * Compress the given directory with all its files.
      */
-    private byte[] zipFiles(File directory, String[] files) throws IOException {
+    private byte[] zipFiles(File directory) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(baos);
-        byte bytes[] = new byte[2048];
 
-        for (String fileName : files) {
-            FileInputStream fis = new FileInputStream(directory.getPath() + File.separator + fileName);
-            BufferedInputStream bis = new BufferedInputStream(fis);
+        addDir(directory, zos, "solutions" + File.separator);
 
-            zos.putNextEntry(new ZipEntry(fileName));
-
-            int bytesRead;
-            while ((bytesRead = bis.read(bytes)) != -1) {
-                zos.write(bytes, 0, bytesRead);
-            }
-            zos.closeEntry();
-            bis.close();
-            fis.close();
-        }
         zos.flush();
         baos.flush();
         zos.close();
         baos.close();
 
         return baos.toByteArray();
+    }
+
+    /**
+     * 
+     * @param dirObj
+     * @throws IOException
+     */
+    private void addDir(File dirObj, ZipOutputStream out, String zipEntryRelativePath) throws IOException {
+        File[] files = dirObj.listFiles();
+        byte[] tmpBuf = new byte[2048];
+
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                addDir(files[i], out, (zipEntryRelativePath + files[i].getName() + File.separator));
+                continue;
+            }
+            FileInputStream in = new FileInputStream(files[i].getAbsolutePath());
+            System.out.println(" Adding: " + files[i].getAbsolutePath());
+            out.putNextEntry(new ZipEntry(zipEntryRelativePath + files[i].getName()));
+            int len;
+            while ((len = in.read(tmpBuf)) > 0) {
+                out.write(tmpBuf, 0, len);
+            }
+            out.closeEntry();
+            in.close();
+        }
     }
 }

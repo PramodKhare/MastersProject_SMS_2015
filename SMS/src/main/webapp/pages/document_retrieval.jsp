@@ -21,10 +21,10 @@
     System.out.println("Total Number of submittables - " + submittableMembers.size());
 
     // TODO This page should only open for Evaluator role for current active member id
-    User user = (User) session.getAttribute(SessionKeys.keyUserObj);
-    if(user.isEvaluatorForMemberId(activeMemberId)){
-        response.sendRedirect("error.jsp");
-    }
+    // User user = (User) session.getAttribute(SessionKeys.keyUserObj);
+    // if(!user.isEvaluatorForMemberId(activeMemberId)){
+    //    response.sendRedirect("error.jsp");
+    // }
 %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
