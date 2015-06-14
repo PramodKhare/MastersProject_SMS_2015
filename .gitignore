@@ -1,7 +1,11 @@
 *.jsdtscope
-.settings/org.eclipse.jdt.core.prefs
-.settings/org.eclipse.wst.common.component
-target/
-bin/
-build/
-.settings/
+SMS/.settings/org.eclipse.jdt.core.prefs
+SMS/.settings/org.eclipse.wst.common.component
+SMS/target/
+SMS/bin/
+SMS/build/
+SMS/.settings/
+SmsDaoExample/target/
+SmsDaoExample/bin/
+SmsDaoExample/build/
+SmsDaoExample/.settings/
