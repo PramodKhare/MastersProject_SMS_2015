@@ -18,7 +18,9 @@ public interface DocumentDao {
 
     public void updateDocument(Document modifiedDocument);
 
-    public void deleteDocument(Document document);
+    public void deleteDocument(final Document document);
 
-    public void saveDocument(Document newDocument);
+    public void saveDocument(final Document newDocument);
+
+    public Document getDocumentByIdWithEvaluations(final Long documentId);
 }

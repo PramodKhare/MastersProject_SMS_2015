@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import edu.neu.ccis.sms.entity.submissions.Document;
+import edu.neu.ccis.sms.entity.submissions.EvalType;
 
 /**
  * Hibernate Entity bean class for Member; Members are simply instances of a
@@ -61,7 +62,6 @@ public class Member implements Serializable, Comparable<Member> {
     @JoinColumn(name = "PARENT_MEMBER_ID")
     private Member parentMember;
 
-    // @OneToMany(fetch = FetchType.LAZY, mappedBy = "parentMember")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentMember", cascade = CascadeType.ALL)
     private Set<Member> childMembers = new HashSet<Member>();
 
@@ -73,14 +73,43 @@ public class Member implements Serializable, Comparable<Member> {
     @Column(nullable = true)
     private Set<Post> posts = new HashSet<Post>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "submittedForMember")
-    @Column(nullable = true)
-    private Set<Document> submissions = new HashSet<Document>();
-
-    // member to user many to many mappings
+    /**
+     * User to Member registration mapping - with their other attributes like
+     * registration dates, their role, the registration status, etc.
+     */
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "member")
     @Column(nullable = false)
     private Set<UserToMemberMapping> userToMemberMappings = new HashSet<UserToMemberMapping>();
+
+    /*************************************************************************
+     * Following attributes/columns are related only to submittable members
+     *************************************************************************/
+
+    /**
+     * This flag keeps track if final evaluations are calculated for each
+     * individual submitted document from their possibly multiple evaluations.
+     * 
+     * This flag will be made true when Coductor clicks on
+     * "disseminating grades" to students // or while calculating fairness of
+     * grades - currently its done during "disseminating grades" to students.
+     */
+    @Column(name = "IS_FINAL_EVALUATED", nullable = false)
+    private boolean isFinalEvaluated = false;
+
+    // The default EvalType - for final Evaluation calculation for submitted
+    // documents, This can be changed while - Disseminating grades to students
+    // or while calculating fairness of grades
+    // IMP - Currently it is done - while Disseminating grades to students, as
+    // fairness calculation is a future work of this project
+    @Column(name = "EVAL_TYPE", nullable = false, updatable = true)
+    private EvalType finalEvalType = EvalType.AVERAGE;
+
+    /**
+     * All submitted documents for this submittable member
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "submittedForMember")
+    @Column(nullable = true)
+    private Set<Document> submissions = new HashSet<Document>();
 
     public Long getId() {
         return id;
@@ -88,6 +117,22 @@ public class Member implements Serializable, Comparable<Member> {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public EvalType getFinalEvalType() {
+        return finalEvalType;
+    }
+
+    public void setFinalEvalType(EvalType finalEvalType) {
+        this.finalEvalType = finalEvalType;
+    }
+
+    public boolean isFinalEvaluated() {
+        return isFinalEvaluated;
+    }
+
+    public void setFinalEvaluated(boolean isFinalEvaluated) {
+        this.isFinalEvaluated = isFinalEvaluated;
     }
 
     public Set<Document> getSubmissions() {

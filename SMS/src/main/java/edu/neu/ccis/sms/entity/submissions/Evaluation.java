@@ -54,8 +54,12 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
     private User evaluatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DOCUMENT_ID", nullable = false)
+    @JoinColumn(name = "DOCUMENT_ID", nullable = true)
     private Document evaluationFor;
+
+    public Evaluation(){
+        evaluatedOnTimestamp = new Date();
+    }
 
     public Long getId() {
         return id;
@@ -125,7 +129,8 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
         }
         if (anObject instanceof Evaluation) {
             Evaluation anotherEval = (Evaluation) anObject;
-            return (this.id.equals(anotherEval.id));
+            return (this.id.equals(anotherEval.id) && this.evaluatedBy.getId().equals(anotherEval.evaluatedBy.getId()) && this.evaluationFor
+                    .getId().equals(anotherEval.evaluationFor.getId()));
         }
         return false;
     }

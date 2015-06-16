@@ -57,6 +57,10 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
     @JoinColumn(name = "DOCUMENT_ID", nullable = false)
     private Document evaluationFor;
 
+    public Evaluation(){
+        evaluatedOnTimestamp = new Date();
+    }
+
     public Long getId() {
         return id;
     }
@@ -73,14 +77,6 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
         this.result = result;
     }
 
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
     public Float getOutOfTotal() {
         return outOfTotal;
     }
@@ -95,6 +91,14 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
 
     public void setEvaluatedOnTimestamp(Date evaluatedOnTimestamp) {
         this.evaluatedOnTimestamp = evaluatedOnTimestamp;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public User getEvaluatedBy() {
@@ -125,7 +129,8 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
         }
         if (anObject instanceof Evaluation) {
             Evaluation anotherEval = (Evaluation) anObject;
-            return (this.id.equals(anotherEval.id));
+            return (this.id.equals(anotherEval.id) && this.evaluatedBy.getId().equals(anotherEval.evaluatedBy.getId()) && this.evaluationFor
+                    .getId().equals(anotherEval.evaluationFor.getId()));
         }
         return false;
     }
