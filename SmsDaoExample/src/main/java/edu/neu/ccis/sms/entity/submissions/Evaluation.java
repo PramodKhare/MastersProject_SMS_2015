@@ -54,7 +54,7 @@ public class Evaluation implements Serializable, Comparable<Evaluation> {
     private User evaluatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DOCUMENT_ID", nullable = false)
+    @JoinColumn(name = "DOCUMENT_ID", nullable = true)
     private Document evaluationFor;
 
     public Evaluation(){

@@ -20,7 +20,7 @@ public interface MemberDao {
 
     public Member getMember(final Long id);
 
-    public void updateMember(Member modifiedMember);
+    public void updateMember(Member modifiedMember) throws Exception;
 
     public void deleteMember(Member member);
 
@@ -46,4 +46,6 @@ public interface MemberDao {
 
     /* Get conductors list for given MemberId */
     public Set<User> getConductorsForMemberId(final Long id);
+
+    public boolean doesMemberNameExistForParentMember(final String memberName, final Long parentMemberId);
 }

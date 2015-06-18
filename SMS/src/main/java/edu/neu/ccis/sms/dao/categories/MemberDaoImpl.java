@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.chemistry.opencmis.client.api.Folder;
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,6 +17,7 @@ import edu.neu.ccis.sms.entity.categories.Member;
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
 import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.entity.users.User;
+import edu.neu.ccis.sms.util.CMISConnector;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
 /**
@@ -50,7 +53,7 @@ public class MemberDaoImpl implements MemberDao {
         return currentSession;
     }
 
-    public void setCurrentSession(Session currentSession) {
+    public void setCurrentSession(final Session currentSession) {
         this.currentSession = currentSession;
     }
 
@@ -58,13 +61,15 @@ public class MemberDaoImpl implements MemberDao {
         return currentTransaction;
     }
 
-    public void setCurrentTransaction(Transaction currentTransaction) {
+    public void setCurrentTransaction(final Transaction currentTransaction) {
         this.currentTransaction = currentTransaction;
     }
 
     @Override
     public void saveMember(Member newMember) {
         openCurrentSessionwithTransaction();
+        // Create the CMS specific folder for this Member
+        createCMSFolderForMember(newMember);
         getCurrentSession().save(newMember);
         closeCurrentSessionwithTransaction();
     }
@@ -72,6 +77,8 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public void saveMember(Member newMember, User conductor) {
         openCurrentSessionwithTransaction();
+        // Create the CMS specific folder for this Member
+        createCMSFolderForMember(newMember);
         Long memberId = (Long) getCurrentSession().save(newMember);
         closeCurrentSessionwithTransaction();
         UserDao userDao = new UserDaoImpl();
@@ -81,20 +88,60 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public void saveMember(Member newMember, Long conductorUserId) {
         openCurrentSessionwithTransaction();
+        // Create the CMS specific folder for this Member
+        createCMSFolderForMember(newMember);
         Long memberId = (Long) getCurrentSession().save(newMember);
         closeCurrentSessionwithTransaction();
         UserDao userDao = new UserDaoImpl();
         userDao.registerUserForMember(conductorUserId, memberId, RoleType.CONDUCTOR);
     }
 
+    /**
+     * To create a member name folder in respective folder hierarchy in CMS
+     */
+    private void createCMSFolderForMember(final Member member) {
+        // Check if member has no parent,
+        if (member.getParentMember() == null) {
+            Folder cmsMemberFolder = CMISConnector.createFolderUnderRoot(member.getName());
+            member.setCmsFolderId(cmsMemberFolder.getId());
+            member.setCmsFolderPath(cmsMemberFolder.getPath());
+        } else {
+            // If parent member exists, then create a child folder under that parent's folder in CMS
+            Folder cmsMemberFolder = CMISConnector.createFolder(member.getParentMember().getCmsFolderPath(),
+                    member.getName());
+            member.setCmsFolderId(cmsMemberFolder.getId());
+            member.setCmsFolderPath(cmsMemberFolder.getPath());
+        }
+    }
+
+    /**
+     * When member name is changed, change the CMS specific folder's name as well and get the updated path and save it
+     * into SMS db
+     * 
+     * @throws Exception
+     */
+    private void renameCMSFolderForMember(final Member member) throws Exception {
+        // first load the Folder details of this member
+        Folder cmsMemberFolder = CMISConnector.getFolderById(member.getCmsFolderId());
+        String oldName = cmsMemberFolder.getName();
+        // Check if the member's name value is changed, if yes then change the CMS folder name as well
+        if (!member.getName().equals(oldName)) {
+            cmsMemberFolder = CMISConnector.renameFolder(cmsMemberFolder.getId(), member.getName());
+        }
+        // Changing the name of CMS folder will change the CMS folder path,
+        // So update it in SMS database, by setting it in hibernate entity object
+        member.setCmsFolderPath(cmsMemberFolder.getPath());
+    }
+
     @Override
-    public void updateMember(Member modifiedMember) {
+    public void updateMember(Member modifiedMember) throws Exception {
         openCurrentSessionwithTransaction();
+        renameCMSFolderForMember(modifiedMember);
         getCurrentSession().update(modifiedMember);
         closeCurrentSessionwithTransaction();
     }
 
-    public Member findByMemberId(Long id) {
+    public Member findByMemberId(final Long id) {
         openCurrentSessionwithTransaction();
         Member member = (Member) getCurrentSession().get(Member.class, id);
         closeCurrentSessionwithTransaction();
@@ -102,7 +149,7 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     @Override
-    public void deleteMember(Member user) {
+    public void deleteMember(final Member user) {
         openCurrentSessionwithTransaction();
         getCurrentSession().delete(user);
         closeCurrentSessionwithTransaction();
@@ -125,12 +172,13 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     @Override
-    public Member getMember(Long id) {
+    public Member getMember(final Long id) {
         return findByMemberId(id);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    public Set<Member> findAllMembersByCategoryAndParentMember(Long categoryId, Long parentMemberId) {
+    public Set<Member> findAllMembersByCategoryAndParentMember(final Long categoryId, final Long parentMemberId) {
         openCurrentSessionwithTransaction();
         Query query = getCurrentSession().createQuery(
                 "from Member WHERE category_id = :categoryId AND parent_member_id = :parentMemberId");
@@ -147,7 +195,7 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     @Override
-    public Set<Member> findAllSubmittableMembersByParentMemberId(Long parentMemberId) {
+    public Set<Member> findAllSubmittableMembersByParentMemberId(final Long parentMemberId) {
         Set<Member> submittableMembers = new HashSet<Member>();
         openCurrentSessionwithTransaction();
         Member member = (Member) getCurrentSession().get(Member.class, parentMemberId);
@@ -160,13 +208,12 @@ public class MemberDaoImpl implements MemberDao {
     }
 
     /**
-     * Recursively trace the whole hierarchy to get all the submittable member
-     * nodes
+     * Recursively trace the whole hierarchy to get all the submittable member nodes
      * 
      * @param member
      * @return
      */
-    private Set<Member> findChildSubmittersRecursively(Member member) {
+    private Set<Member> findChildSubmittersRecursively(final Member member) {
         Set<Member> submittableMembers = new HashSet<Member>();
 
         Set<Member> childMembers = member.getChildMembers();
@@ -178,8 +225,23 @@ public class MemberDaoImpl implements MemberDao {
                 submittableMembers.addAll(findChildSubmittersRecursively(child));
             }
         }
-
         return submittableMembers;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean doesMemberNameExistForParentMember(final String memberName, final Long parentMemberId) {
+        openCurrentSessionwithTransaction();
+        Query query = getQueryForParentMemberId(parentMemberId);
+        query.setParameter("memberName", memberName);
+
+        List<Member> members = query.list();
+        closeCurrentSessionwithTransaction();
+        if (CollectionUtils.isEmpty(members)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -198,6 +260,19 @@ public class MemberDaoImpl implements MemberDao {
         } else {
             return members.get(0);
         }
+    }
+
+    private Query getQueryForParentMemberId(final Long parentMemberId) {
+        Query query;
+        if (null == parentMemberId) {
+            query = getCurrentSession().createQuery(
+                    "from Member WHERE parent_member_id is null AND member_name = :memberName");
+        } else {
+            query = getCurrentSession().createQuery(
+                    "from Member WHERE parent_member_id = :parentMemberId AND member_name = :memberName");
+            query.setParameter("parentMemberId", parentMemberId);
+        }
+        return query;
     }
 
     /**

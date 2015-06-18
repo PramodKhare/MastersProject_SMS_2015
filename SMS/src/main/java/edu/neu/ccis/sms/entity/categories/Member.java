@@ -65,7 +65,7 @@ public class Member implements Serializable, Comparable<Member> {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentMember", cascade = CascadeType.ALL)
     private Set<Member> childMembers = new HashSet<Member>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "member")
+    @OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "member")
     @Column(nullable = false)
     private Set<MemberAttribute> attributes = new HashSet<MemberAttribute>();
 

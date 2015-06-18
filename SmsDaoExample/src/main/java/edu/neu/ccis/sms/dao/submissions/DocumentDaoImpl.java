@@ -2,11 +2,13 @@ package edu.neu.ccis.sms.dao.submissions;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import edu.neu.ccis.sms.entity.submissions.Document;
+import edu.neu.ccis.sms.entity.users.User;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
 /**
@@ -70,8 +72,7 @@ public class DocumentDaoImpl implements DocumentDao {
 
     public Document findByDocumentId(Long id) {
         openCurrentSessionwithTransaction();
-        Document Document = (Document) getCurrentSession().get(Document.class,
-                id);
+        Document Document = (Document) getCurrentSession().get(Document.class, id);
         closeCurrentSessionwithTransaction();
         return Document;
     }
@@ -87,8 +88,7 @@ public class DocumentDaoImpl implements DocumentDao {
     @SuppressWarnings("unchecked")
     public List<Document> getAllDocuments() {
         openCurrentSessionwithTransaction();
-        List<Document> categories = (List<Document>) getCurrentSession()
-                .createQuery("from Document").list();
+        List<Document> categories = (List<Document>) getCurrentSession().createQuery("from Document").list();
         closeCurrentSessionwithTransaction();
         return categories;
     }
@@ -103,5 +103,20 @@ public class DocumentDaoImpl implements DocumentDao {
     @Override
     public Document getDocument(Long id) {
         return findByDocumentId(id);
+    }
+
+    @Override
+    public Document getDocumentByIdWithEvaluations(final Long documentId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery(
+                "select d from Document d left join fetch d.evaluations where d.id = :id");
+        query.setParameter("id", documentId);
+        List<Document> docs = (List<Document>) query.list();
+        closeCurrentSessionwithTransaction();
+        if (docs == null || docs.isEmpty()) {
+            return null;
+        } else {
+            return docs.get(0);
+        }
     }
 }

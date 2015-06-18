@@ -2,21 +2,16 @@ package edu.neu.ccis.sms.dao.categories;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import edu.neu.ccis.sms.entity.categories.UserToMemberMapping;
+import edu.neu.ccis.sms.entity.users.RoleType;
 import edu.neu.ccis.sms.util.HibernateUtil;
 
-/**
- * DAO implementation class for UserToMemberMappingDao interface
- * 
- * @author Pramod R. Khare
- * @date 9-May-2015
- * @lastUpdate 7-June-2015
- */
 public class UserToMemberMappingDaoImpl implements UserToMemberMappingDao {
     private Session currentSession;
     private Transaction currentTransaction;
@@ -99,6 +94,18 @@ public class UserToMemberMappingDaoImpl implements UserToMemberMappingDao {
         closeCurrentSessionwithTransaction();
         return mappings;
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+	public List<UserToMemberMapping> getAllRegisterableMembersForUser(Long userId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery("from UserToMemberMapping WHERE user_id = :userId ORDER BY role");
+        query.setParameter("userId", userId);
+        
+        List<UserToMemberMapping> mappings = (List<UserToMemberMapping>) query.list();
+        closeCurrentSessionwithTransaction();
+        return mappings;
+    }
 
     public UserToMemberMapping findByUserToMemberMappingId(Long id) {
         openCurrentSessionwithTransaction();
@@ -106,6 +113,41 @@ public class UserToMemberMappingDaoImpl implements UserToMemberMappingDao {
                 .get(UserToMemberMapping.class, id);
         closeCurrentSessionwithTransaction();
         return mapping;
+    }
+    
+    @SuppressWarnings("unchecked")
+	@Override
+    public boolean doesUserHaveRoleForMember(Long userId, RoleType role, Long memberId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery("from UserToMemberMapping WHERE user_id = :userId AND member_id = :memberId AND role = :role");
+        query.setParameter("userId", userId);
+        query.setParameter("memberId", memberId);
+        query.setParameter("role", role);
+        List<UserToMemberMapping> mappings = query.list();
+        closeCurrentSessionwithTransaction();
+        if (CollectionUtils.isEmpty(mappings)) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+    
+    @SuppressWarnings("unchecked")
+	@Override
+    public List<UserToMemberMapping> getAllUserRolesForMember(Long userId, Long memberId) {
+        openCurrentSessionwithTransaction();
+        Query query = getCurrentSession().createQuery("from UserToMemberMapping WHERE user_id = :userId AND member_id = :memberId");
+        query.setParameter("userId", userId);
+        query.setParameter("memberId", memberId);
+        List<UserToMemberMapping> mappings = query.list();
+        closeCurrentSessionwithTransaction();
+        if (CollectionUtils.isEmpty(mappings)) {
+            return null;
+        } else {
+            return mappings;
+        }
+
     }
 
     public void deleteAll() {

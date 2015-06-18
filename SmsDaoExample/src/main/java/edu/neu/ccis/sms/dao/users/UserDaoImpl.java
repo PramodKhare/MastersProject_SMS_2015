@@ -217,12 +217,8 @@ public class UserDaoImpl implements UserDao {
         if (user == null) {
             return null;
         }
-        System.out.println("Checking for memberIdToUploadFor = "+memberIdToUploadFor);
         for (Document submission : user.getSubmissions()) {
-            System.out.println("Document - " + submission.getCmsDocumentPath() + " - "
-                    + submission.getSubmittedForMember().getId());
             if (memberIdToUploadFor.equals(submission.getSubmittedForMember().getId())) {
-                System.out.println("Found Document !");
                 return submission;
             }
         }

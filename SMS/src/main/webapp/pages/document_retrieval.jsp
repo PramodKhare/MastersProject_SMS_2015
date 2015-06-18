@@ -1,9 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"
-    import="edu.neu.ccis.sms.constants.SessionKeys,javax.servlet.http.HttpSession,java.util.*,
-    javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.categories.MemberDao,
-    edu.neu.ccis.sms.dao.categories.MemberDaoImpl,edu.neu.ccis.sms.entity.categories.Member,
-    edu.neu.ccis.sms.entity.users.User, edu.neu.ccis.sms.entity.users.RoleType,
+    import="edu.neu.ccis.sms.constants.SessionKeys,
+    javax.servlet.http.HttpSession,java.util.*,
+    javax.servlet.http.HttpServletRequest,
+    edu.neu.ccis.sms.dao.categories.MemberDao,
+    edu.neu.ccis.sms.dao.categories.MemberDaoImpl,
+    edu.neu.ccis.sms.entity.categories.Member,
+    edu.neu.ccis.sms.entity.users.User, 
+    edu.neu.ccis.sms.entity.users.RoleType,
     edu.neu.ccis.sms.entity.categories.UserToMemberMapping"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%
@@ -11,14 +15,13 @@
     Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
     System.out.println("Session activeMemberId - " + activeMemberId);
 
-    //TODO Remove once fully tested
-    activeMemberId = new Long(2);
-
-    Set<Member> submittableMembers = null;
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
-    submittableMembers = memberDao.findAllSubmittableMembersByParentMemberId(activeMemberId);
+    Member activeMember = memberDao.getMember(activeMemberId);
+    Set<Member> submittableMembers = memberDao.findAllSubmittableMembersByParentMemberId(activeMemberId);
     System.out.println("Total Number of submittables - " + submittableMembers.size());
+
+    String activeMemberName = activeMember.getName();
 
     // TODO This page should only open for Evaluator role for current active member id
     // User user = (User) session.getAttribute(SessionKeys.keyUserObj);
@@ -68,8 +71,7 @@
         </style>
     </head>
     <body>
-        <div class="form_header">Document Retrieval page for CS5500</div>
-        <!-- <%=request.getParameter("currentMemberId")%> -->
+        <div class="form_header">Document Retrieval page for <%=activeMemberName%></div>
         <hr />
         <form action="<%=request.getContextPath()%>/DocumentRetrievalForEvaluation" method="POST">
             <table cellpadding="3" border="0">

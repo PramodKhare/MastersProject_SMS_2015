@@ -2,6 +2,7 @@ package edu.neu.ccis.sms.servlets;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -37,13 +38,13 @@ import edu.neu.ccis.sms.entity.users.User;
 @MultipartConfig
 public class DisseminateEvaluationsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(DisseminateEvaluationsServlet.class.getName());
 
     /**
      * @see HttpServlet#HttpServlet()
      */
     public DisseminateEvaluationsServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -62,6 +63,7 @@ public class DisseminateEvaluationsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException
     {
+        LOGGER.info("Method - DisseminateEvaluationsServlet:doPost");
         try {
             HttpSession session = request.getSession(false);
             Long conductorUserId = (Long) session.getAttribute(SessionKeys.keyUserId);
@@ -158,13 +160,13 @@ public class DisseminateEvaluationsServlet extends HttpServlet {
                 docDao.updateDocument(doc);
             }
 
-            System.out.println("Successfully calculated final evaluations for Member! - " + submittableMemberId);
+            LOGGER.info("Successfully calculated final evaluations for Member! - " + submittableMemberId);
             // redirects client to message page
             response.sendRedirect("pages/success.jsp");
         } catch (Exception ex) {
-            request.setAttribute("message", "There was an error: " + ex.getMessage());
+            request.setAttribute("message", "Failed to disseminate evaluations : " + ex.getMessage());
             // redirects client to message page
-            System.out.println(ex.getMessage());
+            LOGGER.info("Failed to disseminate evaluations : "+ex.getMessage());
             response.sendRedirect("pages/error.jsp");
         }
     }

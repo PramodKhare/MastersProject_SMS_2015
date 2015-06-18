@@ -6,7 +6,7 @@ package edu.neu.ccis.sms.entity.submissions;
  * submission, how to calculate the final grades for document. They can be 1)
  * AVERAGE - average out all evaluation results, 2) MAXIMUM - Take the maximum
  * result from available evaluations, 3) MINIMUM - Take the minimum result from
- * available evaluations, 4) MEAN - Take the mean of all available results
+ * available evaluations
  * 
  * @Default value - will be always AVERAGE
  * @author Pramod R. Khare
@@ -14,5 +14,5 @@ package edu.neu.ccis.sms.entity.submissions;
  * @lastUpdate 15-June-2015
  */
 public enum EvalType {
-    AVERAGE, MAXIMUM, MINIMUM, MEAN
+    AVERAGE, MAXIMUM, MINIMUM
 }

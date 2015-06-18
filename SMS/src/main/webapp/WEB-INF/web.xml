@@ -13,6 +13,43 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+    <!-- Context initialization parameters -->
+    <!-- CMS related system config params -->
+    <context-param>
+	    <param-name>CMSUser</param-name>
+	    <param-value>admin</param-value>
+	</context-param>
+    <context-param>
+	    <param-name>CMSPswd</param-name>
+	    <param-value>admin</param-value>
+	</context-param>
+	<context-param>
+        <param-name>CMSAtomPubBindingURL</param-name>
+        <param-value>http://localhost:8080/alfresco/api/-default-/public/cmis/versions/1.1/atom</param-value>
+    </context-param>
+    <context-param>
+        <param-name>CMSRepoNumber</param-name>
+        <param-value>0</param-value>
+    </context-param>
+
+	<!-- Other SMS system related config params -->
+	<!-- File upload related limitations -->
+	<context-param>
+	    <description>sets maximum size of upload file (in Bytes) 52428800 = 50MB</description>
+        <param-name>MaximumFileUploadSize</param-name>
+        <param-value>52428800</param-value>
+    </context-param>
+    <context-param>
+        <description>sets memory threshold - beyond which files are stored in disk (in Bytes) 5242880 = 5MB</description>
+        <param-name>MaximumMemoryThreshold</param-name>
+        <param-value>5242880</param-value>
+    </context-param>
+    <context-param>
+        <description>sets maximum size of request (include file + form data) (in Bytes) 62914560 = 60MB</description>
+        <param-name>MaximumRequestSize</param-name>
+        <param-value>62914560</param-value>
+    </context-param>
+
 	<!-- The mapping for the default servlet -->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>

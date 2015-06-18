@@ -1,8 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"
-	import="edu.neu.ccis.sms.constants.SessionKeys,javax.servlet.http.HttpSession,java.util.*,
-	javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.categories.MemberDao,
-	edu.neu.ccis.sms.dao.categories.MemberDaoImpl,edu.neu.ccis.sms.entity.categories.Member,
+	import="edu.neu.ccis.sms.constants.SessionKeys,
+	javax.servlet.http.HttpSession,java.util.*,
+	javax.servlet.http.HttpServletRequest,
+	edu.neu.ccis.sms.dao.categories.MemberDao,
+	edu.neu.ccis.sms.dao.categories.MemberDaoImpl,
+	edu.neu.ccis.sms.entity.categories.Member,
 	edu.neu.ccis.sms.entity.users.User"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%
@@ -10,15 +13,11 @@
     Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
     System.out.println("Session activeMemberId - " + activeMemberId);
 
-    //TODO Remove once fully tested
-    activeMemberId = new Long(2);
-
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
+    Member activeMember = memberDao.getMember(activeMemberId);
     Set<Member> SubmittableMembers = memberDao.findAllSubmittableMembersByParentMemberId(activeMemberId);
-
     System.out.println("Total Number of submittables - " + SubmittableMembers.size());
-
     Set<User> evaluators = memberDao.getEvaluatorsForMemberId(activeMemberId);
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -62,8 +61,8 @@
 		</style>
 	</head>
 	<body>
-		<div class="form_header">Allocate Submissions To Evaluators for CS5500</div>
-		<!-- <%=request.getParameter("currentMemberId")%> -->
+		<div class="form_header">Allocate Submissions To Evaluators for <%=activeMember.getName()%></div>
+
 		<hr />
 		<form action="<%=request.getContextPath()%>/AllocateToEvaluators" method="POST">
 			<table cellpadding="3" border="0">

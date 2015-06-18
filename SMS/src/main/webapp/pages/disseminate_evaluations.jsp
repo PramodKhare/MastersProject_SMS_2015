@@ -10,16 +10,14 @@
     Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
     System.out.println("Session activeMemberId - " + activeMemberId);
 
-    //TODO Remove once fully tested
-    activeMemberId = new Long(2);
-
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
+    Member activeMember = memberDao.getMember(activeMemberId);
     Set<Member> SubmittableMembers = memberDao.findAllSubmittableMembersByParentMemberId(activeMemberId);
     System.out.println("Total Number of submittables - " + SubmittableMembers.size());
-    
-    // TODO get the activeMember's name 
-    String activeMemberName = "CS5500";
+
+    String activeMemberName = activeMember.getName();
+    // TODO change it to actual Submittable Member id
     String submittableMemberName = "Assignment 1";
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -63,7 +61,7 @@
         </style>
     </head>
     <body>
-        <div class="form_header">Disseminate Evaluations for <%=activeMemberName%> - <%=submittableMemberName%></div>
+        <div class="form_header">Disseminate Evaluations for <%=activeMemberName%></div>
         <hr />
         <form action="<%=request.getContextPath()%>/DisseminateEvaluations" method="POST">
             <table cellpadding="3" border="0">

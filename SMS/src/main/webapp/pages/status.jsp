@@ -14,20 +14,17 @@
     edu.neu.ccis.sms.entity.users.User"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%
-    /* Load all the submittable Member Details */
-    Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
-    System.out.println("Session activeMemberId - " + activeMemberId);
-
-    //TODO Remove once fully tested
-    activeMemberId = new Long(2);
+	/* Load all the submittable Member Details */
+	Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
+	System.out.println("Session activeMemberId - " + activeMemberId);
 
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
+    Member activeMember = memberDao.getMember(activeMemberId);
     Set<Member> submittableMembers = memberDao.findAllSubmittableMembersByParentMemberId(activeMemberId);
     System.out.println("Total Number of submittables - " + submittableMembers.size());
 
-    // TODO get the activeMember's name 
-    String activeMemberName = "CS5500";
+    String activeMemberName = activeMember.getName();
 
     // Get current logged in users all submission documents
     Long userId = (Long)session.getAttribute(SessionKeys.keyUserId);

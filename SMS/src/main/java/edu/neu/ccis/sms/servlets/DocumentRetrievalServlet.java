@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,29 +38,30 @@ import edu.neu.ccis.sms.util.CMISConnector;
 @MultipartConfig
 public class DocumentRetrievalServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(DocumentRetrievalServlet.class.getName());
 
     /**
      * @see HttpServlet#HttpServlet()
      */
     public DocumentRetrievalServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-     *      response)
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
         doPost(request, response);
     }
 
     /**
-     * Upon receiving file upload submission, parses the request to read upload
-     * data and saves the file on disk.
+     * Upon receiving file upload submission, parses the request to read upload data and saves the file on disk.
      */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-            IOException {
+            IOException
+    {
+        LOGGER.info("Method - DocumentRetrievalServlet:doPost");
         try {
             HttpSession session = request.getSession(false);
             Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
@@ -76,14 +78,14 @@ public class DocumentRetrievalServlet extends HttpServlet {
 
             // Clean any previous solution download directories, if any
             if (solutionsDir.exists()) {
-                System.out.println("Deleting the previous Solutions tmp directory!");
+                LOGGER.info("Deleting the previous Solutions tmp directory!");
                 FileUtils.deleteDirectory(solutionsDir);
             }
 
             solutionsDir.mkdirs();
 
             for (User user : evaluateSubmitters) {
-                System.out.println("Downloading document user - " + user.getEmail());
+                LOGGER.info("Downloading document user - " + user.getEmail());
                 Document doc = null;
                 try {
                     doc = userDao.getSubmissionDocumentForMemberIdByUserId(user.getId(), memberId);
@@ -100,12 +102,12 @@ public class DocumentRetrievalServlet extends HttpServlet {
 
                     CMISConnector.downloadDocument(doc.getCmsDocId(), file.getAbsolutePath());
                 } catch (final Exception e) {
-                    System.out.println("Unable to download document - " + doc.getFilename());
+                    LOGGER.info("Unable to download document - " + doc.getFilename());
                     e.printStackTrace();
                 }
             }
 
-            System.out.println("Document submissions downloaded successfully from CMS!!");
+            LOGGER.info("Document submissions downloaded successfully from CMS!!");
 
             // Checks to see if the directory contains some files.
             if (solutionsDir != null && solutionsDir.list().length > 0) {
@@ -123,17 +125,17 @@ public class DocumentRetrievalServlet extends HttpServlet {
 
                 sos.write(zip);
                 sos.flush();
-                System.out.println("zip downloaded successfully!!");
+                LOGGER.info("zip downloaded successfully!!");
             }
 
             // TODO Cleanup the files which were downloaded
             FileUtils.deleteDirectory(solutionsDir);
 
-            System.out.println("Submissions downloaded successfully for evaluation!!");
+            LOGGER.info("Submissions downloaded successfully for evaluation!!");
         } catch (Exception ex) {
-            request.setAttribute("message", "There was an error: " + ex.getMessage());
+            request.setAttribute("message", "Failed to download submissions zip file for evaluation : " + ex.getMessage());
             // redirects client to message page
-            System.out.println(ex.getMessage());
+            LOGGER.info("Failed to download submissions zip file for evaluation : "+ex.getMessage());
             response.sendRedirect("pages/error.jsp");
         }
     }
@@ -170,7 +172,7 @@ public class DocumentRetrievalServlet extends HttpServlet {
                 continue;
             }
             FileInputStream in = new FileInputStream(files[i].getAbsolutePath());
-            System.out.println(" Adding: " + files[i].getAbsolutePath());
+            LOGGER.info(" Adding: " + files[i].getAbsolutePath());
             out.putNextEntry(new ZipEntry(zipEntryRelativePath + files[i].getName()));
             int len;
             while ((len = in.read(tmpBuf)) > 0) {
