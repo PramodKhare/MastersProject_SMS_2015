@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import edu.neu.ccis.sms.constants.SessionKeys;
-
 /**
  * Servlet Filter implementation class SMSLoginFilter
  * 

@@ -51,11 +51,11 @@ public class ViewSubmittableMemberServlet extends HttpServlet {
         MemberDao memberDao = new MemberDaoImpl();
 
         UserToMemberMappingDao userToMemberMappingDao = new UserToMemberMappingDaoImpl();
-        Long userId = (Long) request.getSession().getAttribute(SessionKeys.keyUserId);
+        Long userId = (Long) request.getSession(false).getAttribute(SessionKeys.keyUserId);
         Member member = memberDao.getMember(activeMemberId);
         Set<MemberAttribute> memberAttributes = member.getAttributes();
 
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
         Long registrableParentMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
         session.setAttribute(SessionKeys.activeSubmittableMemberId, activeMemberId);
 
@@ -67,6 +67,7 @@ public class ViewSubmittableMemberServlet extends HttpServlet {
         request.setAttribute(RequestKeys.PARAM_MEMBER_ID, memberId);
         request.setAttribute(RequestKeys.PARAM_MEMBER_NAMEE, member.getName());
         request.setAttribute(RequestKeys.PARAM_MEMBER_ATTRIBUTES, memberAttributes);
+        
         request.getRequestDispatcher(JspViews.VIEW_SUBMITTABLE_MEMBER_VIEW).forward(request, response);
     }
 

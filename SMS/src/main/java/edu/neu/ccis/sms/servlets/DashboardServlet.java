@@ -53,8 +53,8 @@ public class DashboardServlet extends HttpServlet {
 		HashMap<String, String> roleKeyToRoles = 
 				(HashMap<String, String>) context.getAttribute(ContextKeys.ROLE_KEY_TO_ROLE);
 		
-		Long userId = (Long) request.getSession().getAttribute(SessionKeys.keyUserId);
-		String userName = (String) request.getSession().getAttribute(SessionKeys.keyUserName);
+		Long userId = (Long) request.getSession(false).getAttribute(SessionKeys.keyUserId);
+		String userName = (String) request.getSession(false).getAttribute(SessionKeys.keyUserName);
 		LinkedHashMap<String, ArrayList<Member>> rolesToMembers = getRegisteredMemberForUser(userId, roleKeyToRoles);
 
 		request.setAttribute("rolesToMembers", rolesToMembers);

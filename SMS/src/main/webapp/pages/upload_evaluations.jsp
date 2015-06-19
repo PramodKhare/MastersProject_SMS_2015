@@ -9,9 +9,11 @@
     edu.neu.ccis.sms.entity.users.*"%>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<jsp:include page="member/templates/header.jsp" />
 <%
     // Get the current user id
     Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
+    System.out.println("Session userId - " + userId);
 
     // Load all the submittable Member Details
     Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);

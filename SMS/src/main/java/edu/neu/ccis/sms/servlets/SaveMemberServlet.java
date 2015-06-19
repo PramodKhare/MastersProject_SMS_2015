@@ -86,7 +86,7 @@ public class SaveMemberServlet extends HttpServlet {
         }
 		newMember.setAttributes(memberAttributes);
 		
-		Long userId = (Long) request.getSession().getAttribute(SessionKeys.keyUserId);
+		Long userId = (Long) request.getSession(false).getAttribute(SessionKeys.keyUserId);
 		
         // Create a Member Folder in CMS repo, check if its a top-level member
         Folder cmsMemberFolder = null;

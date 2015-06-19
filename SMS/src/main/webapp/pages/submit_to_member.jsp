@@ -4,10 +4,18 @@
     java.util.*,javax.servlet.http.HttpServletRequest,edu.neu.ccis.sms.dao.categories.MemberDao,
     edu.neu.ccis.sms.dao.categories.MemberDaoImpl,edu.neu.ccis.sms.entity.categories.Member"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<jsp:include page="member/templates/header.jsp" />
 <%
-	/* Load all the submittable Member Details */
-	Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
-	System.out.println("Session activeMemberId - " + activeMemberId);
+    // Get the current user id
+    Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
+    System.out.println("Session userId - " + userId);
+
+    // Load all the submittable Member Details
+    Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
+    System.out.println("Session activeMemberId - " + activeMemberId);
+
+    Long submittableMemberId = (Long) session.getAttribute(SessionKeys.activeSubmittableMemberId);
+    System.out.println("Session activeSubmittableMemberId - " + activeMemberId);
 
     // Get the MemberDaoImple instance
     MemberDao memberDao = new MemberDaoImpl();
