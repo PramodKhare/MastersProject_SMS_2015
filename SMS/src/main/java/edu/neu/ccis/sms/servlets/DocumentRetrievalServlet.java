@@ -20,6 +20,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
 
+import edu.neu.ccis.sms.constants.JspViews;
+import edu.neu.ccis.sms.constants.RequestKeys;
 import edu.neu.ccis.sms.constants.SessionKeys;
 import edu.neu.ccis.sms.dao.users.UserDao;
 import edu.neu.ccis.sms.dao.users.UserDaoImpl;
@@ -66,8 +68,13 @@ public class DocumentRetrievalServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
 
+            // Load all the submittable Member Details
+            Long activeMemberId = (Long) session.getAttribute(SessionKeys.activeMemberId);
+            System.out.println("Session activeMemberId - " + activeMemberId);
+
             // Get parameter "memberId" for which submissions to be downloaded
             Long memberId = Long.parseLong(request.getParameter("memberId"));
+            LOGGER.info("Downloading submissions for - " + memberId);
 
             UserDao userDao = new UserDaoImpl();
             User reviewer = userDao.getUserByIdWithSubmittersToEvaluateMappings(userId);
@@ -83,6 +90,9 @@ public class DocumentRetrievalServlet extends HttpServlet {
             }
 
             solutionsDir.mkdirs();
+
+            LOGGER.info("Solutions tmp dir - " + solutionsDir.getAbsolutePath());
+            LOGGER.info("Downloading submissions for submitters " + evaluateSubmitters.size());
 
             for (User user : evaluateSubmitters) {
                 LOGGER.info("Downloading document user - " + user.getEmail());
@@ -101,6 +111,7 @@ public class DocumentRetrievalServlet extends HttpServlet {
                     file.createNewFile();
 
                     CMISConnector.downloadDocument(doc.getCmsDocId(), file.getAbsolutePath());
+                    LOGGER.info("Document downloaded - " + file.getAbsolutePath());
                 } catch (final Exception e) {
                     LOGGER.info("Unable to download document - " + doc.getFilename());
                     e.printStackTrace();
@@ -126,17 +137,27 @@ public class DocumentRetrievalServlet extends HttpServlet {
                 sos.write(zip);
                 sos.flush();
                 LOGGER.info("zip downloaded successfully!!");
+            } else {
+                // Send the error message to UI page to show - that there are no submissions to evaluate or Conductor is
+                // yet to disseminate the submissions for evaluations
+                LOGGER.info("There are no submission available for evaluation."
+                        + "<br/>Either Conductor has not yet allocated the evaluators"
+                        + " OR there are no submissions allocated to you.");
+                request.setAttribute(RequestKeys.PARAM_MESSAGE, "There are no submission available for evaluation."
+                        + "<br/>Either Conductor has not yet allocated the evaluators"
+                        + " OR there are no submissions allocated to you.");
+                request.getRequestDispatcher(JspViews.DOWNLOAD_SUBMISSIONS_VIEW).forward(request, response);
             }
 
             // TODO Cleanup the files which were downloaded
             FileUtils.deleteDirectory(solutionsDir);
-
             LOGGER.info("Submissions downloaded successfully for evaluation!!");
-        } catch (Exception ex) {
-            request.setAttribute("message", "Failed to download submissions zip file for evaluation : " + ex.getMessage());
-            // redirects client to message page
-            LOGGER.info("Failed to download submissions zip file for evaluation : "+ex.getMessage());
-            response.sendRedirect("pages/error.jsp");
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+            request.setAttribute(RequestKeys.PARAM_MESSAGE,
+                    "Failed to download submissions zip file for evaluation. Please try again or contact administrator.");
+            LOGGER.info("Failed to download submissions zip file for evaluation : " + ex.getMessage());
+            request.getRequestDispatcher(JspViews.DOWNLOAD_SUBMISSIONS_VIEW).forward(request, response);
         }
     }
 

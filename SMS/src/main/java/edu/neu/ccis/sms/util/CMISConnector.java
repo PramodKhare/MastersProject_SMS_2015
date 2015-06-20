@@ -440,7 +440,7 @@ public class CMISConnector {
      */
     public static String sanitizeFileFolderNames(String input) {
         LOGGER.info("Sanitizing Folder/File name = " + input);
-        input = input.replaceAll("[./\\\\:*?\"<>|]", "_");
+        input = input.replaceAll("[/\\\\:*?\"<>|]", "_");
         input = input.substring(0, (input.length() > 254 ? 254 : input.length()));
         LOGGER.info("Sanitized Folder/File name = " + input);
         return input;

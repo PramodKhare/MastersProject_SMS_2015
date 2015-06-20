@@ -7,10 +7,11 @@
     edu.neu.ccis.sms.dao.users.*,
     edu.neu.ccis.sms.entity.categories.*,
     edu.neu.ccis.sms.entity.users.*"%>
-
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <jsp:include page="member/templates/header.jsp" />
 <%
+    // Check if there is any message to show in page
+    String message = (String) request.getAttribute("message");
+
     // Get the current user id
     Long userId = (Long) session.getAttribute(SessionKeys.keyUserId);
     System.out.println("Session userId - " + userId);
@@ -22,15 +23,23 @@
     Long submittableMemberId = (Long) session.getAttribute(SessionKeys.activeSubmittableMemberId);
     System.out.println("Session activeSubmittableMemberId - " + activeMemberId);
 
+    // DAOs
+    UserDao userDao = new UserDaoImpl();
     MemberDao memDao = new MemberDaoImpl();
-    Member activeMember = memDao.getMember(activeMemberId);
-    String activeMemberName = activeMember.getName();
+    UserToMemberMappingDao userToMemberMappingDao = new UserToMemberMappingDaoImpl();
 
+    RoleType role = userToMemberMappingDao.getUsersRoleForMember(userId, activeMemberId);
+    if(role == null || role == RoleType.SUBMITTER){
+        response.sendRedirect("dashboard.jsp");
+    }
+
+    Member activeMember = memDao.getMember(activeMemberId);
     Member submittableMember = memDao.getMember(submittableMemberId);
+
+    String activeMemberName = activeMember.getName();
     String submittableMemberName = submittableMember.getName();
 
     // Get the usersToEvaluate for this RoleType.EVALUATOR user
-    UserDao userDao = new UserDaoImpl();
     User user = userDao.getUserByIdWithSubmittersToEvaluateMappings(userId);
     Set<User> submittersToEvaluate = user.getSubmittersToEvaluateForMemberId(submittableMemberId);
 %>
@@ -38,52 +47,17 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Upload Evaluations</title>
-        <style>
-            body {
-                font-family: 'Roboto', sans-serif;
-            }
-            
-            .form_header {
-                font-weight: 100;
-                text-align: left;
-                font-size: 1.8em;
-            }
-            
-            td.doc {
-                color: navy;
-                font-size: 150%;
-            }
-            
-            td.label {
-                font-size: 150%;
-            }
-            
-            th.label {
-                font-size: 150%;
-            }
-            
-            div {
-                color: black;
-                font-size: 150%;
-            }
-            
-            div.error {
-                color: red;
-                font-size: 200%;
-            }
-        </style>
+        <title>Upload Evaluations for <%=activeMemberName%> - <%=submittableMemberName%></title>
     </head>
     <body>
-        <div class="form_header">Upload Evaluations for <%=activeMemberName%> - <%=submittableMemberName%></div>
+        <div>Upload Evaluations for <%=activeMemberName%> - <%=submittableMemberName%></div>
         <hr />
         <form action="<%=request.getContextPath()%>/UploadEvaluations" method="POST">
-            <label style="width:150px;display:inline-block;" for="maxGrades">Maximum Grades (Out of total)</label>
+            <label style="width:300px;display:inline-block;" for="maxGrades">Maximum Grades (Out of total)</label>
             <input type="text" id="maxGrades" name="maxGrades" value="100" size=30 maxlength=5>
             <input type="hidden" id="submittableMemberId" name="submittableMemberId" value="<%=submittableMemberId%>">
             <br/>
             <br/>
-
             <table cellpadding="3" border="2">
                 <tr>
                     <th>Submitter Email-Id</th>
@@ -91,7 +65,6 @@
                     <th>Comments</th>
                 </tr>
                 <%-- Create individual rows dynamically for each submitter for which evaluation to be done --%>
-
                 <%
                     int i = 0;
                     for (User submitter : submittersToEvaluate) {
@@ -105,16 +78,24 @@
             </table>
             <br/>
             <table>
-            <% if (!submittersToEvaluate.isEmpty()){%>
-                <tr>
-                    <td align=center colspan=2>
-                        <input type='submit' style="width: 150px; display: inline-block;" id="uploadEvals" value='Upload Evaluations' />
-                    </td>
-                </tr>
+                <% if (!submittersToEvaluate.isEmpty()){%>
+                    <tr>
+                        <td align=center colspan=2>
+                            <input type='submit' style="width: 150px; display: inline-block;" id="uploadEvals" value='Upload Evaluations' />
+                        </td>
+                    </tr>
                 <%} else {%>
-                   <tr> <td align=center colspan=2> There are no submissions to evaluate for you! </td> </tr>
+                    <tr> 
+                        <td align=center colspan=2> There are no submissions to evaluate for you! </td> 
+                    </tr>
                 <% }%>
             </table>
+            <br/>
+	        <% 
+	            if(message != null) {
+	                out.println("<div>"+message+"</div><br/>");
+	            }
+	        %>
         </form>
         <hr />
     </body>
